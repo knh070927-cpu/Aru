@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d0d1f">
+<meta name="description" content="아루 — 나의 캠퍼스 비서">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>아루 ✦ 나의 캠퍼스 비서</title>
+<meta name="app-version" content="2.0">
+<style>
+#update-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:1000;background:linear-gradient(90deg,#7c6dfa,#4a9eff);color:#fff;padding:10px 20px;font-size:13px;font-family:'Pretendard',-apple-system,sans-serif;align-items:center;gap:12px;animation:slideDown .3s ease;}
+#update-banner.show{display:flex;}
+@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+.upd-text{flex:1;font-weight:500;}
+.upd-text em{opacity:.8;font-size:11.5px;font-style:normal;margin-left:8px;}
+.upd-btn{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;}
+.upd-btn:hover{background:rgba(255,255,255,.35);}
+.upd-x{cursor:pointer;opacity:.7;font-size:18px;padding:2px 6px;line-height:1;}
+.upd-x:hover{opacity:1;}
+</style>
+<style>
+:root {
+  --bg:#0d0d1f;--bg2:#141428;--bg3:#1a1a35;--bg4:#21213f;--bg5:#282850;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--border3:rgba(255,255,255,0.2);
+  --text:#eaeaf8;--text2:#9090b8;--text3:#52527a;--text4:#35355a;
+  --accent:#7c6dfa;--accent2:#a096ff;--accent-bg:rgba(124,109,250,0.13);--accent-border:rgba(124,109,250,0.4);
+  --green:#3ecf8e;--green-bg:rgba(62,207,142,0.1);--green-border:rgba(62,207,142,0.3);
+  --amber:#f59e0b;--amber-bg:rgba(245,158,11,0.1);--amber-border:rgba(245,158,11,0.3);
+  --red:#f04747;--red-bg:rgba(240,71,71,0.1);--red-border:rgba(240,71,71,0.3);
+  --blue:#4a9eff;--blue-bg:rgba(74,158,255,0.1);--blue-border:rgba(74,158,255,0.3);
+  --pink:#ff6b9d;--pink-bg:rgba(255,107,157,0.1);--teal:#2dd4bf;--teal-bg:rgba(45,212,191,0.1);
+  --r:10px;--r-sm:7px;--r-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;background:var(--bg);}
+body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;color:var(--text);display:flex;height:100vh;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:3px;}
+
+/* ── SIDEBAR ── */
+#sidebar{width:200px;min-width:200px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;overflow:hidden;}
+.logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);}
+.logo-mark{font-size:18px;font-weight:800;letter-spacing:-0.5px;color:var(--text);display:flex;align-items:center;gap:6px;}
+.logo-mark span{color:var(--accent2);}
+.logo-sub{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:0.3px;}
+.nav-group{padding:10px 8px 4px;}
+.nav-group-label{font-size:9.5px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:1px;padding:0 8px 6px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-sm);cursor:pointer;font-size:12.5px;color:var(--text2);transition:all .15s;position:relative;margin-bottom:1px;}
+.nav-item:hover{background:var(--bg3);color:var(--text);}
+.nav-item.active{background:var(--accent-bg);color:var(--accent2);font-weight:500;}
+.nav-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:2.5px;background:var(--accent);border-radius:0 2px 2px 0;}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;min-width:16px;text-align:center;}
+.sidebar-bottom{margin-top:auto;padding:10px 8px;border-top:1px solid var(--border);}
+.ai-status{display:flex;align-items:center;gap:6px;padding:6px 10px;font-size:11px;color:var(--text3);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.dot.pulse{animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* ── MAIN ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.page{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.page.active{display:flex;}
+.topbar{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;}
+.topbar-left h1{font-size:17px;font-weight:600;color:var(--text);}
+.topbar-left p{font-size:11px;color:var(--text3);margin-top:2px;}
+.topbar-right{display:flex;gap:7px;flex-shrink:0;}
+.btn{padding:6px 13px;border-radius:var(--r-sm);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;}
+.btn:hover{background:var(--bg4);color:var(--text);border-color:var(--border3);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500;}
+.btn.primary:hover{background:var(--accent2);border-color:var(--accent2);}
+.btn.danger{color:var(--red);border-color:var(--red-border);}
+.btn.danger:hover{background:var(--red-bg);}
+.scroll-area{flex:1;overflow-y:auto;padding:20px 24px;}
+
+/* ── CARDS / COMMON ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;}
+.card-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:500;}
+.tag-purple{background:var(--accent-bg);color:var(--accent2);}
+.tag-green{background:var(--green-bg);color:var(--green);}
+.tag-amber{background:var(--amber-bg);color:var(--amber);}
+.tag-red{background:var(--red-bg);color:var(--red);}
+.tag-blue{background:var(--blue-bg);color:var(--blue);}
+.tag-pink{background:var(--pink-bg);color:var(--pink);}
+.tag-teal{background:var(--teal-bg);color:var(--teal);}
+.empty{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.empty h3{font-size:14px;color:var(--text2);margin-bottom:5px;}
+.empty p{font-size:12px;}
+.form-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.fi{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:7px 10px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none;transition:border-color .15s;}
+.fi:focus{border-color:var(--accent);}
+.fi::placeholder{color:var(--text3);}
+.fi.f1{flex:1;min-width:100px;}
+
+/* ── STAT BOX ── */
+.stat-box{background:var(--bg3);border-radius:var(--r);padding:14px 16px;}
+.stat-num{font-size:28px;font-weight:700;line-height:1;}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:4px;}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;align-items:center;justify-content:center;}
+.overlay.on{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-lg);padding:22px;width:480px;max-width:94vw;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.5);}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{cursor:pointer;color:var(--text3);font-size:20px;line-height:1;}
+.modal-close:hover{color:var(--text);}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;right:20px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:12.5px;color:var(--text);z-index:999;transform:translateY(50px);opacity:0;transition:all .25s;max-width:280px;}
+#toast.on{transform:translateY(0);opacity:1;}
+#toast.ok{border-color:var(--green-border);}
+#toast.err{border-color:var(--red-border);}
+
+/* ────────────────────────────────────────────
+   PAGE: HOME DASHBOARD
+──────────────────────────────────────────── */
+.home-grid{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;}
+.home-left{display:flex;flex-direction:column;gap:14px;}
+.home-right{display:flex;flex-direction:column;gap:14px;}
+.today-banner{background:linear-gradient(135deg,rgba(124,109,250,.18),rgba(74,158,255,.1));border:1px solid var(--accent-border);border-radius:var(--r-lg);padding:18px 20px;display:flex;align-items:center;gap:16px;}
+.today-text h2{font-size:20px;font-weight:700;color:var(--text);}
+.today-text p{font-size:12px;color:var(--text2);margin-top:3px;}
+.today-classes{display:flex;flex-direction:column;gap:6px;}
+.today-class-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--r-sm);border-left:3px solid;}
+.today-class-time{font-size:11px;color:var(--text3);min-width:80px;}
+.today-class-name{font-size:13px;font-weight:500;color:var(--text);}
+.today-class-room{font-size:11px;color:var(--text3);}
+.dday-list{display:flex;flex-direction:column;gap:6px;}
+.dday-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border-radius:var(--r-sm);}
+.dday-name{font-size:12.5px;color:var(--text2);}
+.dday-num{font-size:16px;font-weight:700;}
+.deadline-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.deadline-item:last-child{border-bottom:none;}
+.deadline-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.deadline-info{flex:1;}
+.deadline-title{font-size:12.5px;color:var(--text);font-weight:500;}
+.deadline-sub{font-size:11px;color:var(--text3);}
+.deadline-due{font-size:11px;font-weight:600;}
+
+/* ────────────────────────────────────────────
+   PAGE: TIMETABLE
+──────────────────────────────────────────── */
+.tt-wrap{overflow:auto;flex:1;}
+.tt-table{border-collapse:collapse;width:100%;min-width:600px;}
+.tt-table th{padding:8px 6px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:2;}
+.tt-table td{border:1px solid var(--border);width:calc((100% - 60px)/5);min-height:44px;vertical-align:top;position:relative;}
+.tt-time{width:60px;font-size:10px;color:var(--text3);text-align:center;padding:4px 2px;vertical-align:middle;}
+.tt-cell{min-height:44px;padding:2px;}
+.tt-class{border-radius:6px;padding:4px 7px;cursor:pointer;position:relative;}
+.tt-class-name{font-size:12px;font-weight:600;line-height:1.3;}
+.tt-class-room{font-size:10px;opacity:.75;margin-top:1px;}
+.tt-class-prof{font-size:10px;opacity:.6;}
+.tt-add-btn{width:100%;height:100%;min-height:44px;background:none;border:none;cursor:pointer;color:var(--text4);font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .15s;opacity:0;}
+.tt-cell:hover .tt-add-btn{opacity:1;color:var(--text3);}
+
+/* ────────────────────────────────────────────
+   PAGE: TASKS / SCHEDULE
+──────────────────────────────────────────── */
+.tasks-layout{display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start;}
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;transition:border-color .15s;}
+.task-item:hover{border-color:var(--border2);}
+.task-item.done{opacity:.45;}
+.task-check{width:17px;height:17px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;margin-top:2px;transition:all .15s;}
+.task-check:hover{border-color:var(--green);}
+.task-item.done .task-check{background:var(--green);border-color:var(--green);color:#fff;}
+.task-body{flex:1;}
+.task-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.task-item.done .task-title{text-decoration:line-through;color:var(--text3);}
+.task-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.task-del{color:var(--text3);cursor:pointer;font-size:14px;padding:1px 3px;}
+.task-del:hover{color:var(--red);}
+
+/* ────────────────────────────────────────────
+   PAGE: CLUBS
+──────────────────────────────────────────── */
+.clubs-layout{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start;}
+.club-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;cursor:pointer;transition:all .15s;margin-bottom:8px;}
+.club-card:hover{border-color:var(--border2);}
+.club-card.selected{border-color:var(--accent);background:var(--accent-bg);}
+.club-card-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.club-emoji{font-size:22px;}
+.club-name{font-size:13px;font-weight:600;color:var(--text);}
+.club-role{font-size:11px;color:var(--text3);}
+.club-event{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--r-sm);margin-bottom:6px;border-left:3px solid var(--accent);}
+.club-event-date{font-size:11px;color:var(--text3);min-width:90px;}
+.club-event-name{font-size:12.5px;font-weight:500;color:var(--text);}
+.club-event-note{font-size:11px;color:var(--text3);}
+
+/* ────────────────────────────────────────────
+   PAGE: NOTES
+──────────────────────────────────────────── */
+.notes-layout{display:grid;grid-template-columns:220px 1fr;gap:0;height:100%;}
+.notes-sidebar{border-right:1px solid var(--border);overflow-y:auto;padding:12px 8px;}
+.note-item{padding:9px 10px;border-radius:var(--r-sm);cursor:pointer;margin-bottom:3px;transition:all .15s;}
+.note-item:hover{background:var(--bg3);}
+.note-item.active{background:var(--accent-bg);}
+.note-title{font-size:12.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.note-preview{font-size:10.5px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.note-main{display:flex;flex-direction:column;overflow:hidden;}
+.note-toolbar{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+#note-title-input{background:transparent;border:none;outline:none;font-size:16px;font-weight:600;color:var(--text);font-family:inherit;flex:1;}
+#note-body{flex:1;padding:16px;background:transparent;border:none;outline:none;color:var(--text);font-size:13.5px;font-family:inherit;resize:none;line-height:1.8;}
+
+/* ────────────────────────────────────────────
+   PAGE: FILES
+──────────────────────────────────────────── */
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--r-lg);padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:20px;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-bg);}
+.file-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .15s;}
+.file-card:hover{border-color:var(--border2);background:var(--bg3);}
+.file-icon{font-size:28px;margin-bottom:8px;}
+.file-name{font-size:12px;font-weight:500;word-break:break-all;color:var(--text);margin-bottom:3px;}
+.file-meta{font-size:10.5px;color:var(--text3);}
+.file-actions{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap;}
+.chip{font-size:10px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all .15s;}
+.chip:hover{border-color:var(--accent);color:var(--accent2);}
+.chip.del:hover{border-color:var(--red);color:var(--red);}
+
+/* ────────────────────────────────────────────
+   PAGE: AI CHAT
+──────────────────────────────────────────── */
+.chat-layout{display:flex;flex:1;overflow:hidden;}
+.chat-side{width:220px;min-width:220px;border-right:1px solid var(--border);padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+.chat-side-label{font-size:9.5px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:1px;padding:4px 6px 6px;}
+.mode-card{padding:9px 11px;border-radius:var(--r-sm);border:1px solid var(--border);cursor:pointer;transition:all .15s;background:var(--bg2);}
+.mode-card:hover{border-color:var(--border2);background:var(--bg3);}
+.mode-card.on{border-color:var(--accent);background:var(--accent-bg);}
+.mode-name{font-size:12.5px;font-weight:500;color:var(--text);}
+.mode-desc{font-size:10.5px;color:var(--text3);margin-top:2px;}
+.attach-zone{border:1px dashed var(--border2);border-radius:var(--r-sm);padding:10px;text-align:center;cursor:pointer;transition:all .15s;}
+.attach-zone:hover{border-color:var(--accent);background:var(--accent-bg);}
+.attached-file{display:flex;align-items:center;gap:7px;padding:7px 9px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border);}
+.af-name{font-size:10.5px;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.af-rm{cursor:pointer;color:var(--text3);font-size:13px;}
+.af-rm:hover{color:var(--red);}
+.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.messages{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px;}
+.msg{display:flex;gap:10px;max-width:760px;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.msg.user .av{background:var(--accent);color:#fff;}
+.msg.ai .av{background:var(--bg4);border:1px solid var(--border2);}
+.bubble{padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.75;max-width:580px;}
+.msg.user .bubble{background:var(--accent);color:#fff;border-radius:14px 4px 14px 14px;}
+.msg.ai .bubble{background:var(--bg3);border:1px solid var(--border);border-radius:4px 14px 14px 14px;color:var(--text);white-space:pre-wrap;}
+.welcome{text-align:center;padding:48px 20px;color:var(--text3);}
+.welcome h2{font-size:20px;color:var(--text2);margin-bottom:8px;}
+.welcome p{font-size:13px;line-height:1.6;margin-bottom:20px;}
+.quick-chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:480px;margin:0 auto;}
+.qc{padding:6px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:11.5px;color:var(--text2);cursor:pointer;transition:all .15s;}
+.qc:hover{border-color:var(--accent);color:var(--accent2);background:var(--accent-bg);}
+.typing{display:inline-flex;gap:3px;align-items:center;padding:2px 0;}
+.typing span{width:5px;height:5px;background:var(--text3);border-radius:50%;animation:bounce 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.4;}40%{transform:translateY(-4px);opacity:1;}}
+.chat-input-wrap{padding:14px 22px;border-top:1px solid var(--border);}
+.chat-input-box{display:flex;gap:8px;align-items:flex-end;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:9px 11px;transition:border-color .15s;}
+.chat-input-box:focus-within{border-color:var(--accent);}
+#chat-ta{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:13.5px;font-family:inherit;resize:none;max-height:140px;line-height:1.6;}
+#chat-ta::placeholder{color:var(--text3);}
+.send-btn{background:var(--accent);border:none;border-radius:7px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:15px;color:#fff;transition:all .15s;}
+.send-btn:hover{background:var(--accent2);}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;}
+.chat-hint{font-size:10.5px;color:var(--text3);text-align:center;margin-top:6px;}
+
+/* ────────────────────────────────────────────
+   PAGE: GRADE CALCULATOR
+──────────────────────────────────────────── */
+.grade-layout{display:grid;grid-template-columns:1fr 240px;gap:16px;align-items:start;}
+.grade-row{display:grid;grid-template-columns:1fr 70px 80px 28px;gap:6px;align-items:center;margin-bottom:5px;}
+.gpa-display{font-size:52px;font-weight:800;text-align:center;line-height:1;margin:8px 0;}
+.grade-table-mini{font-size:11px;}
+.grade-table-mini tr td{padding:3px 5px;border-bottom:1px solid var(--border);}
+
+/* ────────────────────────────────────────────
+   PAGE: PARSE
+──────────────────────────────────────────── */
+.parsed-item{display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:6px;}
+
+/* ────────────────────────────────────────────
+   PAGE: CODE HELPER
+──────────────────────────────────────────── */
+.code-layout{display:grid;grid-template-columns:200px 1fr;gap:0;height:100%;}
+.code-modes{border-right:1px solid var(--border);padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;}
+.code-mode-btn{padding:9px 11px;border-radius:var(--r-sm);border:1px solid var(--border);cursor:pointer;transition:all .15s;background:var(--bg2);text-align:left;}
+.code-mode-btn:hover{border-color:var(--border2);background:var(--bg3);}
+.code-mode-btn.on{border-color:var(--accent);background:var(--accent-bg);}
+.code-mode-name{font-size:12.5px;font-weight:500;color:var(--text);}
+.code-mode-desc{font-size:10.5px;color:var(--text3);margin-top:2px;}
+.code-main{display:flex;flex-direction:column;overflow:hidden;}
+.code-editor-area{display:flex;flex-direction:column;gap:0;flex:1;overflow:hidden;}
+.code-input-panel{flex:1;display:flex;flex-direction:column;border-bottom:1px solid var(--border);min-height:0;}
+.code-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:8px 14px 6px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+#code-input{flex:1;background:var(--bg);border:none;outline:none;color:#e0e0ff;font-family:'JetBrains Mono','Fira Code','Consolas',monospace;font-size:13px;padding:14px;resize:none;line-height:1.7;tab-size:2;}
+#code-input::placeholder{color:var(--text4);}
+.code-output-panel{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+#code-output{flex:1;overflow-y:auto;padding:14px;font-size:13px;color:var(--text);line-height:1.75;white-space:pre-wrap;font-family:inherit;}
+.code-toolbar{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.lang-select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:5px 8px;color:var(--text);font-size:11.5px;font-family:inherit;outline:none;}
+.code-run-btn{background:var(--green);border:none;border-radius:var(--r-sm);padding:6px 16px;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.code-run-btn:hover{background:#2fb87a;}
+.code-run-btn:disabled{opacity:.4;cursor:not-allowed;}
+.code-hint-text{font-size:11px;color:var(--text3);margin-left:auto;}
+
+/* syntax-ish highlight for output code blocks */
+.out-code{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;font-family:'JetBrains Mono','Fira Code','Consolas',monospace;font-size:12.5px;line-height:1.7;overflow-x:auto;margin:8px 0;color:#c9d1d9;white-space:pre;}
+.out-section{margin-bottom:14px;}
+.out-section h4{font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* ────────────────────────────────────────────
+   PAGE: CS REFERENCE
+──────────────────────────────────────────── */
+.csref-tabs{display:flex;gap:6px;padding:14px 24px 0;border-bottom:1px solid var(--border);overflow-x:auto;}
+.csref-tab{padding:7px 14px;border-radius:var(--r-sm) var(--r-sm) 0 0;cursor:pointer;font-size:12.5px;color:var(--text3);border:1px solid transparent;border-bottom:none;transition:all .15s;white-space:nowrap;}
+.csref-tab:hover{color:var(--text);}
+.csref-tab.on{color:var(--accent2);border-color:var(--border);background:var(--bg2);font-weight:500;}
+.csref-body{display:none;flex:1;overflow-y:auto;padding:20px 24px;}
+.csref-body.on{display:block;}
+.ref-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:16px;}
+.ref-table th{text-align:left;padding:8px 10px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);}
+.ref-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;}
+.ref-table tr:hover td{background:var(--bg3);}
+.ref-table td:first-child{font-family:'JetBrains Mono','Consolas',monospace;color:var(--accent2);font-size:12px;white-space:nowrap;}
+.complexity-badge{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10.5px;font-weight:600;font-family:monospace;}
+.O-1{background:var(--green-bg);color:var(--green);}
+.O-log{background:var(--teal-bg);color:var(--teal);}
+.O-n{background:var(--blue-bg);color:var(--blue);}
+.O-nlog{background:var(--amber-bg);color:var(--amber);}
+.O-n2{background:var(--red-bg);color:var(--red);}
+.ref-snippet{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-family:'JetBrains Mono','Consolas',monospace;font-size:11.5px;line-height:1.7;color:#c9d1d9;margin:8px 0;overflow-x:auto;white-space:pre;}
+.ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px;}
+.ref-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;}
+.ref-card-title{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.ref-card-body{font-size:11.5px;color:var(--text2);line-height:1.6;}
+.dday-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;text-align:center;cursor:default;}
+.dday-card-num{font-size:42px;font-weight:800;line-height:1;margin:8px 0;}
+.dday-card-name{font-size:13px;font-weight:500;color:var(--text);}
+.dday-card-date{font-size:11px;color:var(--text3);margin-top:4px;}
+.dday-actions{display:flex;gap:5px;justify-content:center;margin-top:10px;}
+
+/* ────────────────────────────────────────────
+   PAGE: SETTINGS
+──────────────────────────────────────────── */
+.settings-row{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
+.settings-lbl{font-size:13px;color:var(--text);}
+.settings-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.settings-section{margin-bottom:24px;}
+.settings-section-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+.install-banner{background:linear-gradient(135deg,var(--accent-bg),var(--blue-bg));border:1px solid var(--accent-border);border-radius:var(--r-lg);padding:18px 20px;display:flex;gap:14px;align-items:center;margin-bottom:20px;}
+.install-banner h3{font-size:13.5px;color:var(--text);margin-bottom:3px;}
+.install-banner p{font-size:11.5px;color:var(--text2);line-height:1.5;}
+</style>
+</head>
+<body>
+
+<!-- ████ 업데이트 배너 ████ -->
+<div id="update-banner">
+  <span style="font-size:18px;">✨</span>
+  <div class="upd-text">아루 업데이트가 있어요! <em id="upd-notes"></em></div>
+  <button class="upd-btn" onclick="applyUpdate()">지금 업데이트</button>
+  <span class="upd-x" onclick="dismissUpdate()">✕</span>
+</div>
+
+<!-- ████ SIDEBAR ████ -->
+<nav id="sidebar">
+  <div class="logo">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="icon-192.png" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
+      <div>
+        <div class="logo-mark">✦ <span>아루</span></div>
+        <div class="logo-sub">나의 캠퍼스 AI 비서</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">홈</div>
+    <div class="nav-item active" id="nav-home" onclick="go('home')"><span class="nav-icon">🏠</span>대시보드</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">학습</div>
+    <div class="nav-item" id="nav-chat" onclick="go('chat')"><span class="nav-icon">💬</span>AI 아루</div>
+    <div class="nav-item" id="nav-files" onclick="go('files')"><span class="nav-icon">📁</span>파일 보관함</div>
+    <div class="nav-item" id="nav-notes" onclick="go('notes')"><span class="nav-icon">📝</span>과목 노트</div>
+    <div class="nav-item" id="nav-grade" onclick="go('grade')"><span class="nav-icon">📊</span>학점 계산기</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">일정</div>
+    <div class="nav-item" id="nav-timetable" onclick="go('timetable')"><span class="nav-icon">🗓️</span>시간표</div>
+    <div class="nav-item" id="nav-tasks" onclick="go('tasks')"><span class="nav-icon">✅</span>과제/일정<span class="nav-badge" id="task-badge" style="display:none"></span></div>
+    <div class="nav-item" id="nav-clubs" onclick="go('clubs')"><span class="nav-icon">🎭</span>동아리/활동</div>
+    <div class="nav-item" id="nav-dday" onclick="go('dday')"><span class="nav-icon">📌</span>D-day</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">CS / 코딩</div>
+    <div class="nav-item" id="nav-code" onclick="go('code')"><span class="nav-icon">💻</span>코드 도우미</div>
+    <div class="nav-item" id="nav-csref" onclick="go('csref')"><span class="nav-icon">📐</span>CS 레퍼런스</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">도구</div>
+    <div class="nav-item" id="nav-parse" onclick="go('parse')"><span class="nav-icon">📋</span>공지 파싱</div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="nav-item" id="nav-settings" onclick="go('settings')" style="margin-bottom:6px;"><span class="nav-icon">⚙️</span>설정</div>
+    <div class="ai-status"><div class="dot pulse"></div><span>아루 AI 연결됨</span></div>
+  </div>
+</nav>
+
+<!-- ████ MAIN ████ -->
+<div id="main">
+
+<!-- ══════════════════════════════════════
+     HOME DASHBOARD
+══════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="topbar">
+    <div class="topbar-left"><h1 id="home-greeting">안녕하세요 👋</h1><p id="home-date"></p></div>
+    <div class="topbar-right">
+      <button class="btn primary" onclick="go('chat')">아루에게 질문하기 →</button>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="home-grid">
+      <div class="home-left">
+        <!-- stat row -->
+        <div class="grid-3" id="home-stats">
+          <div class="stat-box"><div class="stat-num" id="hs-tasks" style="color:var(--accent2)">—</div><div class="stat-lbl">남은 과제</div></div>
+          <div class="stat-box"><div class="stat-num" id="hs-urgent" style="color:var(--red)">—</div><div class="stat-lbl">3일 내 마감</div></div>
+          <div class="stat-box"><div class="stat-num" id="hs-files" style="color:var(--green)">—</div><div class="stat-lbl">저장 파일</div></div>
+        </div>
+        <!-- today timetable -->
+        <div class="card">
+          <div class="card-title">📅 오늘 수업</div>
+          <div id="home-today-classes"><div style="font-size:12px;color:var(--text3);">시간표를 등록하면 오늘 수업이 여기 표시돼요.</div></div>
+        </div>
+        <!-- upcoming deadlines -->
+        <div class="card">
+          <div class="card-title">⏰ 다가오는 마감</div>
+          <div id="home-deadlines"></div>
+        </div>
+        <!-- club events -->
+        <div class="card">
+          <div class="card-title">🎭 이번 주 동아리 일정</div>
+          <div id="home-club-events"></div>
+        </div>
+      </div>
+      <div class="home-right">
+        <!-- dday -->
+        <div class="card">
+          <div class="card-title">📌 D-day</div>
+          <div class="dday-list" id="home-ddays"></div>
+          <button class="btn" style="width:100%;margin-top:10px;" onclick="go('dday')">관리하기 →</button>
+        </div>
+        <!-- quick actions -->
+        <div class="card">
+          <div class="card-title">⚡ 빠른 실행</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <button class="btn" style="width:100%;text-align:left;" onclick="openAddTask()">+ 과제 추가</button>
+            <button class="btn" style="width:100%;text-align:left;" onclick="go('parse')">+ 공지 붙여넣기</button>
+            <button class="btn" style="width:100%;text-align:left;" onclick="go('timetable')">+ 시간표 편집</button>
+            <button class="btn" style="width:100%;text-align:left;" onclick="go('notes')">+ 새 노트</button>
+            <button class="btn" style="width:100%;text-align:left;" onclick="go('dday')">+ D-day 추가</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TIMETABLE
+══════════════════════════════════════ -->
+<div class="page" id="page-timetable">
+  <div class="topbar">
+    <div class="topbar-left"><h1>🗓️ 시간표</h1><p>수업 일정을 등록하고 관리하세요</p></div>
+    <div class="topbar-right">
+      <button class="btn" onclick="clearTT()">초기화</button>
+      <button class="btn primary" onclick="showAddClass()">+ 수업 추가</button>
+    </div>
+  </div>
+  <div class="tt-wrap" style="padding:20px 24px;">
+    <table class="tt-table" id="tt-table">
+      <thead>
+        <tr>
+          <th class="tt-time"></th>
+          <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th>
+        </tr>
+      </thead>
+      <tbody id="tt-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TASKS
+══════════════════════════════════════ -->
+<div class="page" id="page-tasks">
+  <div class="topbar">
+    <div class="topbar-left"><h1>✅ 과제 / 일정</h1><p>마감일을 관리하고 완료 처리하세요</p></div>
+    <div class="topbar-right">
+      <select class="btn" id="task-filter" onchange="renderTasks()">
+        <option value="all">전체</option>
+        <option value="hw">과제</option>
+        <option value="exam">시험</option>
+        <option value="report">리포트</option>
+        <option value="proj">프로젝트</option>
+      </select>
+      <button class="btn" onclick="sortByDue()">마감순 정렬</button>
+      <button class="btn primary" onclick="openAddTask()">+ 추가</button>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="tasks-layout">
+      <div>
+        <div id="task-list"></div>
+        <div class="empty" id="task-empty" style="display:none;">
+          <div class="empty-icon">✅</div><h3>등록된 항목이 없어요</h3><p>+ 추가 버튼으로 과제를 등록해보세요</p>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-title">현황</div>
+          <div id="task-stats"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">⏰ 임박 마감</div>
+          <div id="task-upcoming"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CLUBS
+══════════════════════════════════════ -->
+<div class="page" id="page-clubs">
+  <div class="topbar">
+    <div class="topbar-left"><h1>🎭 동아리 / 활동</h1><p>동아리, 학생회, 스터디 등 활동을 관리하세요</p></div>
+    <div class="topbar-right">
+      <button class="btn primary" onclick="showAddClub()">+ 동아리 추가</button>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="clubs-layout">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">내 동아리</div>
+        <div id="club-list"></div>
+        <div class="empty" id="club-empty" style="display:none;">
+          <div class="empty-icon">🎭</div><h3>등록된 동아리가 없어요</h3>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;" id="club-detail-title">일정</div>
+          <button class="btn" onclick="showAddClubEvent()" id="add-event-btn" style="display:none;">+ 일정 추가</button>
+        </div>
+        <div id="club-events-list"></div>
+        <div class="empty" id="club-events-empty" style="display:none;">
+          <div class="empty-icon">📅</div><h3>등록된 일정이 없어요</h3><p>왼쪽에서 동아리를 선택하거나 추가하세요</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     D-DAY
+══════════════════════════════════════ -->
+<div class="page" id="page-dday">
+  <div class="topbar">
+    <div class="topbar-left"><h1>📌 D-day 카운터</h1><p>시험, 축제, 방학 등 중요한 날을 카운트해요</p></div>
+    <div class="topbar-right">
+      <button class="btn primary" onclick="showAddDday()">+ 추가</button>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="grid-auto" id="dday-grid"></div>
+    <div class="empty" id="dday-empty" style="display:none;">
+      <div class="empty-icon">📌</div><h3>등록된 D-day가 없어요</h3><p>시험일, 방학, 축제 등을 추가해보세요</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     NOTES
+══════════════════════════════════════ -->
+<div class="page" id="page-notes" style="height:100%;">
+  <div class="topbar">
+    <div class="topbar-left"><h1>📝 과목 노트</h1><p>과목별 강의 노트, 요약, 아이디어를 기록하세요</p></div>
+    <div class="topbar-right">
+      <button class="btn primary" onclick="newNote()">+ 새 노트</button>
+    </div>
+  </div>
+  <div class="notes-layout" style="flex:1;overflow:hidden;">
+    <div class="notes-sidebar">
+      <div id="notes-list"></div>
+      <div class="empty" id="notes-empty" style="display:none;padding:20px 10px;">
+        <div class="empty-icon">📝</div><h3>노트 없음</h3>
+      </div>
+    </div>
+    <div class="note-main">
+      <div id="note-editor" style="display:none;flex:1;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="note-toolbar">
+          <input type="text" id="note-title-input" placeholder="노트 제목..." />
+          <select class="fi" id="note-subject-sel" style="width:110px;font-size:11px;padding:4px 6px;"></select>
+          <button class="btn" onclick="saveCurrentNote()">저장</button>
+          <button class="btn danger" onclick="deleteCurrentNote()">삭제</button>
+        </div>
+        <textarea id="note-body" placeholder="여기에 노트를 작성하세요...&#10;&#10;강의 내용, 요약, 아이디어 뭐든지 OK!"></textarea>
+      </div>
+      <div id="note-placeholder" class="empty" style="flex:1;">
+        <div class="empty-icon">📝</div><h3>노트를 선택하거나 새로 만드세요</h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FILES
+══════════════════════════════════════ -->
+<div class="page" id="page-files">
+  <div class="topbar">
+    <div class="topbar-left"><h1>📁 파일 보관함</h1><p>강의자료, PPT, PDF를 저장하고 AI와 분석하세요</p></div>
+    <div class="topbar-right">
+      <button class="btn primary" onclick="document.getElementById('vault-input').click()">+ 파일 추가</button>
+      <input type="file" id="vault-input" multiple accept=".pdf,.png,.jpg,.jpeg,.pptx,.docx,.txt,.hwp,.gif,.webp" style="display:none" onchange="uploadVault(event)">
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('vault-input').click()" ondragover="doDragOver(event)" ondrop="doDrop(event)" ondragleave="doDragLeave()">
+      <div style="font-size:36px;margin-bottom:10px;">📂</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px;">드래그하거나 클릭해서 업로드</div>
+      <div style="font-size:11px;color:var(--text3);">PDF · 이미지 · PPTX · DOCX · HWP · TXT (최대 10MB)</div>
+    </div>
+    <div id="files-area"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     AI CHAT
+══════════════════════════════════════ -->
+<div class="page" id="page-chat">
+  <div class="topbar">
+    <div class="topbar-left"><h1>💬 AI 아루</h1><p>개념 해설·문제 풀이·리포트·시험 준비</p></div>
+    <div class="topbar-right"><button class="btn" onclick="clearChat()">초기화</button></div>
+  </div>
+  <div class="chat-layout">
+    <div class="chat-side">
+      <div class="chat-side-label">모드</div>
+      <div class="mode-card on" id="m-explain" onclick="setMode('explain')"><div class="mode-name">📖 개념 해설</div><div class="mode-desc">이론을 쉽게 설명</div></div>
+      <div class="mode-card" id="m-problem" onclick="setMode('problem')"><div class="mode-name">🧩 문제 해설</div><div class="mode-desc">단계별 풀이 안내</div></div>
+      <div class="mode-card" id="m-report" onclick="setMode('report')"><div class="mode-name">📝 리포트 작성</div><div class="mode-desc">학술 리포트 생성</div></div>
+      <div class="mode-card" id="m-summary" onclick="setMode('summary')"><div class="mode-name">⚡ 파일 요약</div><div class="mode-desc">자료 핵심 정리</div></div>
+      <div class="mode-card" id="m-exam" onclick="setMode('exam')"><div class="mode-name">🎯 시험 대비</div><div class="mode-desc">예상 문제 생성</div></div>
+      <div class="mode-card" id="m-free" onclick="setMode('free')"><div class="mode-name">💡 자유 질문</div><div class="mode-desc">무엇이든 OK</div></div>
+      <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+      <div class="chat-side-label">파일 첨부</div>
+      <div class="attach-zone" onclick="document.getElementById('chat-file').click()">
+        <div style="font-size:20px;">📎</div>
+        <div style="font-size:10.5px;color:var(--text3);margin-top:3px;">PDF · 이미지 첨부</div>
+        <input type="file" id="chat-file" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp" style="display:none" onchange="attachChatFile(event)">
+      </div>
+      <div id="chat-attached"></div>
+    </div>
+    <div class="chat-main">
+      <div class="messages" id="messages">
+        <div class="welcome" id="welcome">
+          <img src="icon-192.png" style="width:72px;height:72px;border-radius:50%;margin-bottom:14px;object-fit:cover;" onerror="this.style.display='none'">
+          <h2>안녕하세요! 저는 아루예요 ✦</h2>
+          <p>왼쪽에서 모드를 선택하고<br>파일을 첨부하거나 바로 질문해보세요.</p>
+          <div class="quick-chips">
+            <div class="qc" onclick="qp('케인즈 총수요 이론을 쉽게 설명해줘')">경제학 개념</div>
+            <div class="qc" onclick="qp('기후변화와 국제정치 A4 3장 리포트 써줘')">리포트 작성</div>
+            <div class="qc" onclick="qp('미적분학 연립방정식 단계별 풀이')">수학 풀이</div>
+            <div class="qc" onclick="qp('운영체제 프로세스와 스레드 차이')">CS 개념</div>
+            <div class="qc" onclick="qp('다음 시험 범위 요약 + 예상 문제 만들어줘')">시험 대비</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-wrap">
+        <div class="chat-input-box">
+          <textarea id="chat-ta" rows="1" placeholder="질문 입력 (Enter 전송 / Shift+Enter 줄바꿈)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendChat()">↑</button>
+        </div>
+        <div class="chat-hint">현재 모드: <span id="mode-lbl" style="color:var(--accent2)">개념 해설</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     GRADE CALCULATOR
+══════════════════════════════════════ -->
+<div class="page" id="page-grade">
+  <div class="topbar">
+    <div class="topbar-left"><h1>📊 학점 계산기</h1><p>성적 입력 → GPA 자동 계산 및 목표 시뮬레이션</p></div>
+    <div class="topbar-right">
+      <button class="btn" onclick="addGradeRow()">+ 과목</button>
+      <button class="btn primary" onclick="calcGPA()">계산하기</button>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="grade-layout">
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-title">이번 학기 성적 입력</div>
+          <div style="display:grid;grid-template-columns:1fr 70px 80px 28px;gap:6px;margin-bottom:6px;">
+            <div style="font-size:10.5px;color:var(--text3);padding:0 2px;">과목명</div>
+            <div style="font-size:10.5px;color:var(--text3);text-align:center;">학점</div>
+            <div style="font-size:10.5px;color:var(--text3);text-align:center;">등급</div>
+            <div></div>
+          </div>
+          <div id="grade-rows"></div>
+          <button class="btn" style="width:100%;margin-top:8px;font-size:11px;" onclick="addGradeRow()">+ 과목 추가</button>
+        </div>
+        <div class="card">
+          <div class="card-title">🎯 목표 GPA 시뮬레이터</div>
+          <div class="form-row">
+            <label style="font-size:12px;color:var(--text2);align-self:center;min-width:90px;">목표 누적 GPA</label>
+            <input type="number" id="target-gpa" value="3.5" min="0" max="4.5" step="0.01" class="fi" style="width:80px;text-align:center;">
+          </div>
+          <div class="form-row">
+            <label style="font-size:12px;color:var(--text2);align-self:center;min-width:90px;">현재 이수 학점</label>
+            <input type="number" id="cur-credits" value="60" min="0" class="fi" style="width:80px;text-align:center;">
+          </div>
+          <button class="btn primary" style="width:100%;margin-top:6px;" onclick="simGPA()">시뮬레이션</button>
+          <div id="sim-result" style="margin-top:10px;font-size:12.5px;color:var(--text2);display:none;line-height:1.7;"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-title">계산 결과</div>
+          <div class="gpa-display" id="gpa-disp" style="color:var(--accent2)">—</div>
+          <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:14px;">/ 4.5</div>
+          <div id="gpa-stats"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">등급 환산표</div>
+          <div class="grade-table-mini" id="grade-ref-table"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PARSE
+══════════════════════════════════════ -->
+<div class="page" id="page-parse">
+  <div class="topbar">
+    <div class="topbar-left"><h1>📋 공지 파싱</h1><p>플라토 공지를 붙여넣으면 아루가 과제 일정을 자동 추출해요</p></div>
+    <div class="topbar-right"><a href="https://plato.pusan.ac.kr" target="_blank" class="btn">플라토 열기 ↗</a></div>
+  </div>
+  <div class="scroll-area" style="max-width:700px;">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title">사용 방법</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;gap:10px;font-size:12.5px;color:var(--text2);"><div style="width:20px;height:20px;border-radius:50%;background:var(--accent-bg);color:var(--accent2);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</div>플라토 → 강의실 → 공지/과제 페이지에서 텍스트 전체 복사</div>
+        <div style="display:flex;gap:10px;font-size:12.5px;color:var(--text2);"><div style="width:20px;height:20px;border-radius:50%;background:var(--accent-bg);color:var(--accent2);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</div>아래 입력창에 붙여넣기 (Ctrl+V)</div>
+        <div style="display:flex;gap:10px;font-size:12.5px;color:var(--text2);"><div style="width:20px;height:20px;border-radius:50%;background:var(--accent-bg);color:var(--accent2);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</div>아루가 과제명·마감일·유형을 파싱 → 과제 스케줄에 자동 등록</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title">공지 붙여넣기</div>
+      <textarea id="parse-input" style="width:100%;min-height:150px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px;color:var(--text);font-size:12.5px;font-family:inherit;resize:vertical;outline:none;line-height:1.7;" placeholder="예시:
+[과제] 중간 리포트 제출 마감: 10월 18일 23:59
+[퀴즈] 4주차 온라인 퀴즈 마감: 10/15 자정
+기말고사: 12월 18일 오전 10시 303호"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn primary" id="parse-btn" onclick="runParse()">아루야, 파싱해줘 ✦</button>
+        <button class="btn" onclick="document.getElementById('parse-input').value=''">초기화</button>
+      </div>
+    </div>
+    <div id="parse-result" style="display:none;">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;">파싱 결과</div>
+      <div id="parse-items"></div>
+      <button class="btn primary" style="width:100%;margin-top:10px;" onclick="registerParsed()">선택 항목 과제 스케줄에 등록 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CODE HELPER
+══════════════════════════════════════ -->
+<div class="page" id="page-code">
+  <div class="topbar">
+    <div class="topbar-left"><h1>💻 코드 도우미</h1><p>코드를 붙여넣고 아루에게 설명·디버깅·리뷰·변환을 요청하세요</p></div>
+    <div class="topbar-right">
+      <button class="btn" onclick="clearCodeOutput()">출력 초기화</button>
+    </div>
+  </div>
+  <div class="code-layout" style="flex:1;overflow:hidden;">
+    <!-- Mode selector -->
+    <div class="code-modes">
+      <div style="font-size:9.5px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:1px;padding:2px 6px 8px;">분석 모드</div>
+      <div class="code-mode-btn on" id="cm-explain" onclick="setCodeMode('explain')"><div class="code-mode-name">🔍 코드 설명</div><div class="code-mode-desc">코드 동작 원리 분석</div></div>
+      <div class="code-mode-btn" id="cm-debug" onclick="setCodeMode('debug')"><div class="code-mode-name">🐛 디버깅</div><div class="code-mode-desc">버그 찾기 & 수정 제안</div></div>
+      <div class="code-mode-btn" id="cm-review" onclick="setCodeMode('review')"><div class="code-mode-name">✅ 코드 리뷰</div><div class="code-mode-desc">개선점·최적화 제안</div></div>
+      <div class="code-mode-btn" id="cm-algo" onclick="setCodeMode('algo')"><div class="code-mode-name">⚡ 알고리즘</div><div class="code-mode-desc">시간복잡도·풀이 설명</div></div>
+      <div class="code-mode-btn" id="cm-convert" onclick="setCodeMode('convert')"><div class="code-mode-name">🔄 언어 변환</div><div class="code-mode-desc">다른 언어로 변환</div></div>
+      <div class="code-mode-btn" id="cm-generate" onclick="setCodeMode('generate')"><div class="code-mode-name">✨ 코드 생성</div><div class="code-mode-desc">요구사항 → 코드 작성</div></div>
+      <div class="code-mode-btn" id="cm-test" onclick="setCodeMode('test')"><div class="code-mode-name">🧪 테스트 케이스</div><div class="code-mode-desc">테스트 케이스 생성</div></div>
+      <div class="code-mode-btn" id="cm-comment" onclick="setCodeMode('comment')"><div class="code-mode-name">📝 주석 달기</div><div class="code-mode-desc">상세 주석 자동 추가</div></div>
+      <div style="height:1px;background:var(--border);margin:6px 0;"></div>
+      <div style="font-size:9.5px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:1px;padding:2px 6px 6px;">변환 대상 언어</div>
+      <select class="lang-select" id="target-lang" style="width:100%;margin:0 2px;">
+        <option value="Python">Python</option>
+        <option value="Java">Java</option>
+        <option value="C">C</option>
+        <option value="C++">C++</option>
+        <option value="JavaScript">JavaScript</option>
+        <option value="TypeScript">TypeScript</option>
+        <option value="Kotlin">Kotlin</option>
+        <option value="Go">Go</option>
+        <option value="Rust">Rust</option>
+      </select>
+    </div>
+
+    <!-- Editor + Output -->
+    <div class="code-main">
+      <div class="code-editor-area">
+        <!-- Input -->
+        <div class="code-input-panel">
+          <div class="code-label">
+            <span>코드 입력</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select class="lang-select" id="code-lang">
+                <option>Python</option><option>Java</option><option>C</option>
+                <option>C++</option><option>JavaScript</option><option>TypeScript</option>
+                <option>Kotlin</option><option>Go</option><option>Rust</option><option>SQL</option><option>기타</option>
+              </select>
+              <button class="btn" onclick="document.getElementById('code-input').value=''" style="font-size:11px;padding:3px 8px;">지우기</button>
+            </div>
+          </div>
+          <textarea id="code-input" placeholder="// 코드를 여기에 붙여넣거나 직접 작성하세요
+// 코드 없이 설명만 입력해도 됩니다
+
+def example():
+    pass"></textarea>
+        </div>
+        <!-- Question + Run -->
+        <div class="code-toolbar">
+          <input class="fi" id="code-question" placeholder="추가 질문 (선택) — 예: 시간복잡도도 알려줘" style="flex:1;font-size:12px;">
+          <button class="code-run-btn" id="code-run-btn" onclick="runCodeAI()">아루야, 분석해줘 ✦</button>
+          <span class="code-hint-text" id="code-mode-hint">모드: 코드 설명</span>
+        </div>
+        <!-- Output -->
+        <div class="code-output-panel">
+          <div class="code-label"><span>아루 분석 결과</span><button class="btn" onclick="copyCodeOutput()" style="font-size:10px;padding:2px 7px;">복사</button></div>
+          <div id="code-output">
+            <div style="text-align:center;padding:40px;color:var(--text3);">
+              <div style="font-size:32px;margin-bottom:10px;">💻</div>
+              <div style="font-size:13px;">코드를 입력하고 분석을 요청하면<br>아루가 여기에 결과를 보여드려요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CS REFERENCE
+══════════════════════════════════════ -->
+<div class="page" id="page-csref">
+  <div class="topbar">
+    <div class="topbar-left"><h1>📐 CS 레퍼런스</h1><p>자료구조·알고리즘·복잡도·코드 스니펫 빠른 참조</p></div>
+  </div>
+  <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <div class="csref-tabs">
+      <div class="csref-tab on" onclick="csTab('complexity')">⏱ 시간복잡도</div>
+      <div class="csref-tab" onclick="csTab('ds')">🗂 자료구조</div>
+      <div class="csref-tab" onclick="csTab('sort')">🔢 정렬 알고리즘</div>
+      <div class="csref-tab" onclick="csTab('search')">🔍 탐색 알고리즘</div>
+      <div class="csref-tab" onclick="csTab('graph')">🕸 그래프</div>
+      <div class="csref-tab" onclick="csTab('snippets')">📋 코드 스니펫</div>
+      <div class="csref-tab" onclick="csTab('os')">🖥 운영체제</div>
+      <div class="csref-tab" onclick="csTab('network')">🌐 네트워크</div>
+    </div>
+
+    <!-- 시간복잡도 -->
+    <div class="csref-body on" id="csref-complexity">
+      <div class="card-title" style="margin-bottom:14px;">Big-O 복잡도 비교</div>
+      <table class="ref-table">
+        <tr><th>표기</th><th>이름</th><th>예시</th><th>입력 n=1000</th></tr>
+        <tr><td>O(1)</td><td>상수 시간</td><td>배열 인덱스 접근, 해시맵 조회</td><td><span class="complexity-badge O-1">최상</span> ~1 연산</td></tr>
+        <tr><td>O(log n)</td><td>로그 시간</td><td>이진 탐색, 힙 삽입/삭제</td><td><span class="complexity-badge O-log">우수</span> ~10 연산</td></tr>
+        <tr><td>O(n)</td><td>선형 시간</td><td>배열 순회, 선형 탐색</td><td><span class="complexity-badge O-n">양호</span> ~1,000 연산</td></tr>
+        <tr><td>O(n log n)</td><td>선형로그</td><td>합병정렬, 퀵정렬(평균)</td><td><span class="complexity-badge O-nlog">주의</span> ~10,000 연산</td></tr>
+        <tr><td>O(n²)</td><td>이차 시간</td><td>버블/삽입/선택 정렬, 2중 루프</td><td><span class="complexity-badge O-n2">느림</span> ~1,000,000 연산</td></tr>
+        <tr><td>O(2ⁿ)</td><td>지수 시간</td><td>피보나치 재귀, 부분집합</td><td><span class="complexity-badge O-n2">매우 느림</span></td></tr>
+        <tr><td>O(n!)</td><td>팩토리얼</td><td>순열, 외판원 문제 완전탐색</td><td><span class="complexity-badge O-n2">불가</span></td></tr>
+      </table>
+      <div class="card-title" style="margin:20px 0 12px;">자료구조 연산별 복잡도</div>
+      <table class="ref-table">
+        <tr><th>자료구조</th><th>접근</th><th>탐색</th><th>삽입</th><th>삭제</th><th>공간</th></tr>
+        <tr><td>배열 (Array)</td><td><span class="complexity-badge O-1">O(1)</span></td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-n">O(n)</span></td></tr>
+        <tr><td>연결 리스트</td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-1">O(1)</span></td><td><span class="complexity-badge O-1">O(1)</span></td><td><span class="complexity-badge O-n">O(n)</span></td></tr>
+        <tr><td>스택 / 큐</td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-1">O(1)</span></td><td><span class="complexity-badge O-1">O(1)</span></td><td><span class="complexity-badge O-n">O(n)</span></td></tr>
+        <tr><td>해시 테이블</td><td>—</td><td><span class="complexity-badge O-1">O(1)~O(n)</span></td><td><span class="complexity-badge O-1">O(1)~O(n)</span></td><td><span class="complexity-badge O-1">O(1)~O(n)</span></td><td><span class="complexity-badge O-n">O(n)</span></td></tr>
+        <tr><td>이진 탐색 트리</td><td><span class="complexity-badge O-log">O(log n)</span></td><td><span class="complexity-badge O-log">O(log n)</span></td><td><span class="complexity-badge O-log">O(log n)</span></td><td><span class="complexity-badge O-log">O(log n)</span></td><td><span class="complexity-badge O-n">O(n)</span></td></tr>
+        <tr><td>힙 (Heap)</td><td><span class="complexity-badge O-1">O(1)</span></td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-log">O(log n)</span></td><td><span class="complexity-badge O-log">O(log n)</span></td><td><span class="complexity-badge O-n">O(n)</span></td></tr>
+      </table>
+    </div>
+
+    <!-- 자료구조 -->
+    <div class="csref-body" id="csref-ds">
+      <div class="ref-grid">
+        <div class="ref-card"><div class="ref-card-title">📦 스택 (Stack)</div><div class="ref-card-body">LIFO (Last In First Out)<br>함수 콜스택, 괄호 검사, 되돌리기(Undo)<br><br><strong style="color:var(--accent2)">Python:</strong></div><pre class="ref-snippet">stack = []
+stack.append(1)   # push
+top = stack.pop() # pop
+peek = stack[-1]  # peek</pre></div>
+        <div class="ref-card"><div class="ref-card-title">🚶 큐 (Queue)</div><div class="ref-card-body">FIFO (First In First Out)<br>BFS, 프린터 스풀, 프로세스 스케줄링</div><pre class="ref-snippet">from collections import deque
+q = deque()
+q.append(1)      # enqueue
+x = q.popleft()  # dequeue</pre></div>
+        <div class="ref-card"><div class="ref-card-title">🔗 연결 리스트</div><div class="ref-card-body">노드가 포인터로 연결된 선형 구조<br>삽입/삭제 O(1), 접근 O(n)<br>단방향 / 양방향 / 원형</div><pre class="ref-snippet">class Node:
+    def __init__(self, val):
+        self.val = val
+        self.next = None</pre></div>
+        <div class="ref-card"><div class="ref-card-title">🌳 이진 트리</div><div class="ref-card-body">각 노드가 최대 2개 자식<br>전위/중위/후위 순회<br>BST: 왼쪽 &lt; 루트 &lt; 오른쪽</div><pre class="ref-snippet">class TreeNode:
+    def __init__(self, val):
+        self.val = val
+        self.left = None
+        self.right = None</pre></div>
+        <div class="ref-card"><div class="ref-card-title">🗺 해시맵</div><div class="ref-card-body">키-값 쌍 저장, 평균 O(1)<br>충돌 처리: 체이닝, 개방 주소법</div><pre class="ref-snippet">d = {}
+d['key'] = 'value'
+val = d.get('key', default)
+'key' in d  # True/False</pre></div>
+        <div class="ref-card"><div class="ref-card-title">⛰ 힙 (Heap)</div><div class="ref-card-body">완전 이진 트리 기반<br>최솟값/최댓값 O(1) 접근<br>우선순위 큐에 주로 사용</div><pre class="ref-snippet">import heapq
+h = []
+heapq.heappush(h, 3)
+min_val = heapq.heappop(h)
+# 최대힙: -값으로 저장</pre></div>
+      </div>
+    </div>
+
+    <!-- 정렬 -->
+    <div class="csref-body" id="csref-sort">
+      <table class="ref-table">
+        <tr><th>알고리즘</th><th>평균</th><th>최선</th><th>최악</th><th>공간</th><th>안정</th><th>특징</th></tr>
+        <tr><td>버블 정렬</td><td><span class="complexity-badge O-n2">O(n²)</span></td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-n2">O(n²)</span></td><td><span class="complexity-badge O-1">O(1)</span></td><td>✅</td><td>구현 쉬움, 실용성 낮음</td></tr>
+        <tr><td>선택 정렬</td><td><span class="complexity-badge O-n2">O(n²)</span></td><td><span class="complexity-badge O-n2">O(n²)</span></td><td><span class="complexity-badge O-n2">O(n²)</span></td><td><span class="complexity-badge O-1">O(1)</span></td><td>❌</td><td>교환 횟수 최소</td></tr>
+        <tr><td>삽입 정렬</td><td><span class="complexity-badge O-n2">O(n²)</span></td><td><span class="complexity-badge O-n">O(n)</span></td><td><span class="complexity-badge O-n2">O(n²)</span></td><td><span class="complexity-badge O-1">O(1)</span></td><td>✅</td><td>거의 정렬된 경우 빠름</td></tr>
+        <tr><td>퀵 정렬</td><td><span class="complexity-badge O-nlog">O(n log n)</span></td><td><span class="complexity-badge O-nlog">O(n log n)</span></td><td><span class="complexity-badge O-n2">O(n²)</span></td><td><span class="complexity-badge O-log">O(log n)</span></td><td>❌</td><td>실제로 가장 빠름, 피벗 선택 중요</td></tr>
+        <tr><td>합병 정렬</td><td><span class="complexity-badge O-nlog">O(n log n)</span></td><td><span class="complexity-badge O-nlog">O(n log n)</span></td><td><span class="complexity-badge O-nlog">O(n log n)</span></td><td><span class="complexity-badge O-n">O(n)</span></td><td>✅</td><td>안정, 추가 메모리 필요</td></tr>
+        <tr><td>힙 정렬</td><td><span class="complexity-badge O-nlog">O(n log n)</span></td><td><span class="complexity-badge O-nlog">O(n log n)</span></td><td><span class="complexity-badge O-nlog">O(n log n)</span></td><td><span class="complexity-badge O-1">O(1)</span></td><td>❌</td><td>제자리, 캐시 비효율</td></tr>
+        <tr><td>계수 정렬</td><td><span class="complexity-badge O-n">O(n+k)</span></td><td><span class="complexity-badge O-n">O(n+k)</span></td><td><span class="complexity-badge O-n">O(n+k)</span></td><td><span class="complexity-badge O-n">O(k)</span></td><td>✅</td><td>정수, 범위 작을 때 최강</td></tr>
+      </table>
+      <div class="card-title" style="margin:20px 0 12px;">Python 정렬 스니펫</div>
+      <pre class="ref-snippet">arr.sort()                        # 제자리 정렬 (오름차순)
+arr.sort(reverse=True)            # 내림차순
+sorted_arr = sorted(arr)          # 새 리스트 반환
+arr.sort(key=lambda x: x[1])     # 두 번째 원소 기준
+arr.sort(key=lambda x: (-x[0], x[1]))  # 복합 정렬</pre>
+    </div>
+
+    <!-- 탐색 -->
+    <div class="csref-body" id="csref-search">
+      <div class="ref-grid">
+        <div class="ref-card"><div class="ref-card-title">🔍 선형 탐색 O(n)</div><pre class="ref-snippet">def linear_search(arr, target):
+    for i, v in enumerate(arr):
+        if v == target:
+            return i
+    return -1</pre></div>
+        <div class="ref-card"><div class="ref-card-title">⚡ 이진 탐색 O(log n)</div><pre class="ref-snippet">def binary_search(arr, target):
+    lo, hi = 0, len(arr) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if arr[mid] == target: return mid
+        elif arr[mid] < target: lo = mid + 1
+        else: hi = mid - 1
+    return -1</pre></div>
+        <div class="ref-card"><div class="ref-card-title">🌊 BFS — 너비 우선</div><pre class="ref-snippet">from collections import deque
+def bfs(graph, start):
+    visited = set([start])
+    q = deque([start])
+    while q:
+        node = q.popleft()
+        for nei in graph[node]:
+            if nei not in visited:
+                visited.add(nei)
+                q.append(nei)</pre></div>
+        <div class="ref-card"><div class="ref-card-title">🌿 DFS — 깊이 우선</div><pre class="ref-snippet">def dfs(graph, node, visited=None):
+    if visited is None:
+        visited = set()
+    visited.add(node)
+    for nei in graph[node]:
+        if nei not in visited:
+            dfs(graph, nei, visited)
+    return visited</pre></div>
+      </div>
+    </div>
+
+    <!-- 그래프 -->
+    <div class="csref-body" id="csref-graph">
+      <div class="ref-grid">
+        <div class="ref-card"><div class="ref-card-title">🗺 다익스트라 (최단경로)</div><div class="ref-card-body">가중치 있는 그래프, O((V+E) log V)</div><pre class="ref-snippet">import heapq
+def dijkstra(graph, src):
+    dist = {n: float('inf') for n in graph}
+    dist[src] = 0
+    pq = [(0, src)]
+    while pq:
+        d, u = heapq.heappop(pq)
+        if d > dist[u]: continue
+        for v, w in graph[u]:
+            if dist[u]+w < dist[v]:
+                dist[v] = dist[u]+w
+                heapq.heappush(pq,(dist[v],v))
+    return dist</pre></div>
+        <div class="ref-card"><div class="ref-card-title">🔗 Union-Find (서로소 집합)</div><pre class="ref-snippet">parent = list(range(n))
+def find(x):
+    if parent[x] != x:
+        parent[x] = find(parent[x])
+    return parent[x]
+def union(a, b):
+    a, b = find(a), find(b)
+    if a != b: parent[b] = a</pre></div>
+        <div class="ref-card"><div class="ref-card-title">🌲 위상 정렬 (Topological Sort)</div><div class="ref-card-body">DAG에서 의존성 순서 결정 (과목 선수체계 등)</div><pre class="ref-snippet">from collections import deque
+def topo_sort(graph, in_deg, n):
+    q = deque([i for i in range(n) if in_deg[i]==0])
+    order = []
+    while q:
+        u = q.popleft(); order.append(u)
+        for v in graph[u]:
+            in_deg[v] -= 1
+            if in_deg[v] == 0: q.append(v)
+    return order</pre></div>
+        <div class="ref-card"><div class="ref-card-title">🔀 플로이드-워셜 (전체 최단경로)</div><div class="ref-card-body">모든 쌍 최단경로, O(V³)</div><pre class="ref-snippet">INF = float('inf')
+for k in range(n):
+    for i in range(n):
+        for j in range(n):
+            dist[i][j] = min(
+                dist[i][j],
+                dist[i][k] + dist[k][j]
+            )</pre></div>
+      </div>
+    </div>
+
+    <!-- 스니펫 -->
+    <div class="csref-body" id="csref-snippets">
+      <div class="ref-grid">
+        <div class="ref-card"><div class="ref-card-title">Python — 자주 쓰는 패턴</div><pre class="ref-snippet"># 2D 배열 초기화
+grid = [[0]*cols for _ in range(rows)]
+
+# Counter (빈도수)
+from collections import Counter
+cnt = Counter(arr)  # {'a':3, 'b':1}
+
+# defaultdict
+from collections import defaultdict
+d = defaultdict(list)
+
+# 조합 / 순열
+from itertools import combinations, permutations
+list(combinations([1,2,3], 2))
+list(permutations([1,2,3], 2))
+
+# 이진탐색 bisect
+from bisect import bisect_left, insort</pre></div>
+        <div class="ref-card"><div class="ref-card-title">DP 기본 패턴</div><pre class="ref-snippet"># 1D DP (피보나치)
+dp = [0] * (n+1)
+dp[1] = 1
+for i in range(2, n+1):
+    dp[i] = dp[i-1] + dp[i-2]
+
+# 2D DP (LCS)
+dp = [[0]*(m+1) for _ in range(n+1)]
+for i in range(1, n+1):
+    for j in range(1, m+1):
+        if a[i-1] == b[j-1]:
+            dp[i][j] = dp[i-1][j-1] + 1
+        else:
+            dp[i][j] = max(dp[i-1][j], dp[i][j-1])</pre></div>
+        <div class="ref-card"><div class="ref-card-title">Java — 자주 쓰는 패턴</div><pre class="ref-snippet">// ArrayList, HashMap
+List<Integer> list = new ArrayList<>();
+Map<String,Integer> map = new HashMap<>();
+
+// 정렬
+Collections.sort(list);
+Arrays.sort(arr);
+list.sort(Comparator.reverseOrder());
+
+// PriorityQueue (최소힙)
+PriorityQueue<Integer> pq = new PriorityQueue<>();
+pq.offer(3); pq.poll();
+
+// String → int 변환
+int n = Integer.parseInt("123");</pre></div>
+        <div class="ref-card"><div class="ref-card-title">C++ — 자주 쓰는 패턴</div><pre class="ref-snippet">// vector, map, set
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <algorithm>
+
+// 정렬
+sort(v.begin(), v.end());
+sort(v.begin(), v.end(), greater<int>());
+
+// priority_queue (최대힙)
+priority_queue<int> pq;
+// 최소힙
+priority_queue<int, vector<int>, greater<int>>();
+
+// 이진탐색
+lower_bound(v.begin(), v.end(), target);</pre></div>
+      </div>
+    </div>
+
+    <!-- 운영체제 -->
+    <div class="csref-body" id="csref-os">
+      <div class="ref-grid">
+        <div class="ref-card"><div class="ref-card-title">🔄 프로세스 vs 스레드</div><div class="ref-card-body"><strong style="color:var(--accent2)">프로세스</strong><br>독립된 메모리 공간 (코드/데이터/힙/스택)<br>Context Switch 비용 큼<br>IPC 필요 (파이프, 소켓 등)<br><br><strong style="color:var(--green)">스레드</strong><br>프로세스 내 실행 단위<br>코드/데이터/힙 공유, 스택은 독립<br>Context Switch 비용 적음<br>동기화 필요 (Mutex, Semaphore)</div></div>
+        <div class="ref-card"><div class="ref-card-title">📅 CPU 스케줄링</div><div class="ref-card-body"><strong style="color:var(--accent2)">비선점형</strong><br>FCFS — 도착 순서대로<br>SJF — 짧은 작업 먼저<br><br><strong style="color:var(--green)">선점형</strong><br>Round Robin — 시간 할당량(Time Quantum)<br>SRTF — 남은 시간 짧은 것 우선<br>Priority — 우선순위 기반 (기아 발생)</div></div>
+        <div class="ref-card"><div class="ref-card-title">🔒 교착상태 (Deadlock)</div><div class="ref-card-body">4가지 필요 조건 (모두 충족 시 발생):<br>1. 상호 배제<br>2. 점유와 대기<br>3. 비선점<br>4. 순환 대기<br><br>해결: 예방 / 회피(은행원 알고리즘) / 탐지 및 회복</div></div>
+        <div class="ref-card"><div class="ref-card-title">💾 메모리 관리</div><div class="ref-card-body">페이징: 고정 크기 블록, 외부 단편화 없음<br>세그멘테이션: 논리적 단위<br><br>가상 메모리 — 페이지 교체 알고리즘:<br>FIFO / LRU / LFU / Optimal<br><br>Thrashing: 페이지 폴트 과다 발생</div></div>
+      </div>
+    </div>
+
+    <!-- 네트워크 -->
+    <div class="csref-body" id="csref-network">
+      <div class="ref-grid">
+        <div class="ref-card"><div class="ref-card-title">🌐 OSI 7계층</div><div class="ref-card-body" style="font-size:11.5px;"><div style="display:grid;grid-template-columns:24px 1fr;gap:3px 8px;line-height:1.6;">
+          <span style="color:var(--accent2);">7</span><span>응용 (Application) — HTTP, FTP, DNS</span>
+          <span style="color:var(--accent2);">6</span><span>표현 (Presentation) — SSL, 암호화</span>
+          <span style="color:var(--accent2);">5</span><span>세션 (Session) — 세션 관리</span>
+          <span style="color:var(--green);">4</span><span>전송 (Transport) — TCP, UDP</span>
+          <span style="color:var(--amber);">3</span><span>네트워크 (Network) — IP, 라우터</span>
+          <span style="color:var(--amber);">2</span><span>데이터링크 — MAC, 스위치</span>
+          <span style="color:var(--amber);">1</span><span>물리 (Physical) — 케이블, 허브</span>
+        </div></div></div>
+        <div class="ref-card"><div class="ref-card-title">🤝 TCP vs UDP</div><div class="ref-card-body"><strong style="color:var(--blue)">TCP</strong><br>연결 지향, 3-way handshake<br>신뢰성 보장, 흐름/혼잡 제어<br>HTTP, SMTP, FTP<br><br><strong style="color:var(--amber)">UDP</strong><br>비연결, 빠름, 신뢰성 없음<br>DNS, 스트리밍, 게임, VoIP</div></div>
+        <div class="ref-card"><div class="ref-card-title">🔐 HTTP vs HTTPS</div><div class="ref-card-body">HTTP: 평문 전송, 포트 80<br>HTTPS: SSL/TLS 암호화, 포트 443<br><br>HTTP 메서드:<br>GET — 조회<br>POST — 생성<br>PUT/PATCH — 수정<br>DELETE — 삭제<br><br>상태 코드: 2xx 성공, 3xx 리다이렉트, 4xx 클라이언트 오류, 5xx 서버 오류</div></div>
+        <div class="ref-card"><div class="ref-card-title">📡 DNS 동작 흐름</div><div class="ref-card-body">1. 브라우저 캐시 확인<br>2. OS /etc/hosts 확인<br>3. Local DNS 서버 질의<br>4. Root DNS → TLD DNS → 권한 DNS<br>5. IP 주소 반환 → TCP 연결<br><br>레코드: A(IPv4), AAAA(IPv6), CNAME(별칭), MX(메일)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SETTINGS
+══════════════════════════════════════ -->
+<div class="page" id="page-settings">
+  <div class="topbar"><div class="topbar-left"><h1>⚙️ 설정</h1></div></div>
+  <div class="scroll-area" style="max-width:580px;">
+    <div class="install-banner">
+      <div style="font-size:36px;">💻</div>
+      <div>
+        <h3>데스크탑 앱으로 설치</h3>
+        <p>Chrome에서 열기 → 주소창 우측 ⊕ 클릭 → "아루를 앱으로 설치"<br>바탕화면 바로가기가 자동 생성됩니다</p>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-lbl">내 정보</div>
+      <div class="settings-row"><div><div class="settings-lbl">이름</div></div><input type="text" class="fi" id="s-name" placeholder="홍길동" oninput="ss('name',this.value)" style="width:160px;"></div>
+      <div class="settings-row"><div><div class="settings-lbl">학과 / 전공</div><div class="settings-sub">AI가 전공 수준에 맞게 설명해요</div></div><input type="text" class="fi" id="s-major" placeholder="경제학과" oninput="ss('major',this.value)" style="width:160px;"></div>
+      <div class="settings-row"><div><div class="settings-lbl">학년</div></div><select class="fi" id="s-year" onchange="ss('year',this.value)" style="width:100px;"><option value="">선택</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option><option value="4">4학년</option></select></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-lbl">수강 과목</div>
+      <div class="settings-row"><div><div class="settings-lbl">과목 목록</div><div class="settings-sub">쉼표로 구분 — 파일 자동 분류에 활용</div></div><input type="text" class="fi" id="s-subjects" placeholder="미시경제학, 운영체제, 영어작문" oninput="ss('subjects',this.value)" style="width:220px;"></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-lbl">데이터</div>
+      <div class="settings-row"><div><div class="settings-lbl">전체 초기화</div><div class="settings-sub">모든 데이터 삭제</div></div><button class="btn danger" onclick="if(confirm('정말 초기화할까요?')){localStorage.clear();location.reload();}">초기화</button></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-lbl">앱 정보</div>
+      <div class="settings-row"><div class="settings-lbl">버전</div><span style="font-size:12px;color:var(--text3);">아루 v2.0</span></div>
+      <div class="settings-row"><div class="settings-lbl">AI 엔진</div><span style="font-size:12px;color:var(--text3);">Claude (Anthropic)</span></div>
+      <div class="settings-row"><div class="settings-lbl">부산대 플라토</div><a href="https://plato.pusan.ac.kr" target="_blank" class="btn">바로가기 ↗</a></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #main -->
+
+<!-- ════ MODALS ════ -->
+
+<!-- Add Class -->
+<div class="overlay" id="m-addclass">
+  <div class="modal">
+    <h2>수업 추가 <span class="modal-close" onclick="closeModal('m-addclass')">✕</span></h2>
+    <div class="form-row"><input class="fi f1" id="cl-name" placeholder="과목명 (예: 미시경제학)"></div>
+    <div class="form-row">
+      <select class="fi" id="cl-day"><option value="0">월</option><option value="1">화</option><option value="2">수</option><option value="3">목</option><option value="4">금</option></select>
+      <input type="time" class="fi f1" id="cl-start" value="09:00">
+      <span style="align-self:center;color:var(--text3);font-size:12px;">~</span>
+      <input type="time" class="fi f1" id="cl-end" value="10:30">
+    </div>
+    <div class="form-row"><input class="fi f1" id="cl-room" placeholder="강의실 (예: 인문관 301)"><input class="fi f1" id="cl-prof" placeholder="교수명"></div>
+    <div class="form-row">
+      <label style="font-size:12px;color:var(--text2);align-self:center;">색상</label>
+      <div id="color-picker" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;"><button class="btn primary" onclick="saveClass()">추가</button><button class="btn" onclick="closeModal('m-addclass')">취소</button></div>
+  </div>
+</div>
+
+<!-- Add Task -->
+<div class="overlay" id="m-addtask">
+  <div class="modal">
+    <h2>과제 / 일정 추가 <span class="modal-close" onclick="closeModal('m-addtask')">✕</span></h2>
+    <div class="form-row"><input class="fi f1" id="t-title" placeholder="과제명 (예: 경제학 중간 리포트)"></div>
+    <div class="form-row">
+      <input class="fi f1" id="t-subject" placeholder="과목명">
+      <select class="fi" id="t-type"><option value="hw">과제</option><option value="exam">시험</option><option value="report">리포트</option><option value="proj">프로젝트</option><option value="etc">기타</option></select>
+    </div>
+    <div class="form-row"><input type="datetime-local" class="fi f1" id="t-due"><input class="fi f1" id="t-note" placeholder="메모"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;"><button class="btn primary" onclick="saveTask()">추가</button><button class="btn" onclick="closeModal('m-addtask')">취소</button></div>
+  </div>
+</div>
+
+<!-- Add Club -->
+<div class="overlay" id="m-addclub">
+  <div class="modal">
+    <h2>동아리 추가 <span class="modal-close" onclick="closeModal('m-addclub')">✕</span></h2>
+    <div class="form-row"><input class="fi f1" id="cb-name" placeholder="동아리/활동 이름 (예: 경제학 스터디)"></div>
+    <div class="form-row">
+      <input class="fi f1" id="cb-emoji" placeholder="이모지 (예: 📚)" maxlength="2">
+      <input class="fi f1" id="cb-role" placeholder="나의 역할 (예: 부원)">
+    </div>
+    <div class="form-row"><input class="fi f1" id="cb-note" placeholder="메모"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;"><button class="btn primary" onclick="saveClub()">추가</button><button class="btn" onclick="closeModal('m-addclub')">취소</button></div>
+  </div>
+</div>
+
+<!-- Add Club Event -->
+<div class="overlay" id="m-addclubevent">
+  <div class="modal">
+    <h2>동아리 일정 추가 <span class="modal-close" onclick="closeModal('m-addclubevent')">✕</span></h2>
+    <div class="form-row"><input class="fi f1" id="ce-name" placeholder="일정명 (예: 정기 모임)"></div>
+    <div class="form-row"><input type="datetime-local" class="fi f1" id="ce-date"><input class="fi f1" id="ce-place" placeholder="장소"></div>
+    <div class="form-row"><input class="fi f1" id="ce-note" placeholder="메모"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;"><button class="btn primary" onclick="saveClubEvent()">추가</button><button class="btn" onclick="closeModal('m-addclubevent')">취소</button></div>
+  </div>
+</div>
+
+<!-- Add D-day -->
+<div class="overlay" id="m-adddday">
+  <div class="modal">
+    <h2>D-day 추가 <span class="modal-close" onclick="closeModal('m-adddday')">✕</span></h2>
+    <div class="form-row"><input class="fi f1" id="dd-name" placeholder="이름 (예: 기말고사, 졸업식, 방학)"></div>
+    <div class="form-row"><input type="date" class="fi f1" id="dd-date"><input class="fi f1" id="dd-emoji" placeholder="이모지 (예: 📚)" maxlength="2"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;"><button class="btn primary" onclick="saveDday()">추가</button><button class="btn" onclick="closeModal('m-adddday')">취소</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ╔══════════════════════════════════════════════════════╗
+//   STATE
+// ╚══════════════════════════════════════════════════════╝
+let settings = JSON.parse(localStorage.getItem('aru_settings')||'{}');
+let tasks    = JSON.parse(localStorage.getItem('aru_tasks')||'[]');
+let classes  = JSON.parse(localStorage.getItem('aru_classes')||'[]');
+let clubs    = JSON.parse(localStorage.getItem('aru_clubs')||'[]');
+let ddays    = JSON.parse(localStorage.getItem('aru_ddays')||'[]');
+let notes    = JSON.parse(localStorage.getItem('aru_notes')||'[]');
+let vaultMeta= JSON.parse(localStorage.getItem('aru_vault')||'[]');
+let chatHistory=[], chatAttached=[], currentMode='explain', currentNoteId=null, selectedClubId=null, parsedItems=[];
+
+const DAYS=['월','화','수','목','금'];
+const HOURS=Array.from({length:13},(_,i)=>i+8); // 8~20
+const CLASS_COLORS=['#7c6dfa','#3ecf8e','#4a9eff','#f59e0b','#f04747','#ff6b9d','#2dd4bf','#a78bfa','#fb923c'];
+let selectedColor=CLASS_COLORS[0];
+
+const GRADE_MAP={'A+':4.5,'A0':4.0,'A-':3.7,'B+':3.3,'B0':3.0,'B-':2.7,'C+':2.3,'C0':2.0,'C-':1.7,'D+':1.3,'D0':1.0,'D-':0.7,'F':0};
+const MODE_CFG={
+  explain:{lbl:'개념 해설',sys:'당신은 부산대학교 학생의 학습을 돕는 AI 비서 아루입니다. 복잡한 개념을 핵심 정의·원리·예시·연결 개념을 포함해 명확하게 설명하세요. 한국어로 답변하세요.'},
+  problem:{lbl:'문제 해설',sys:'당신은 AI 튜터 아루입니다. 문제를 단계별로 풀이하고 각 단계의 이유를 설명해 학생이 스스로 이해할 수 있도록 안내하세요. 한국어로 답변하세요.'},
+  report:{lbl:'리포트 작성',sys:'당신은 대학 리포트 작성 전문 AI 아루입니다. 서론(배경·목적)·본론(분석·근거)·결론(요약·시사점) 구조로 학술적 문체의 리포트를 작성하세요. 한국어로 작성하세요.'},
+  summary:{lbl:'파일 요약',sys:'당신은 강의자료 분석 전문 AI 아루입니다. 업로드된 파일의 핵심 개념·이론·용어를 목차 형식으로 체계적으로 정리하세요. 한국어로 답변하세요.'},
+  exam:{lbl:'시험 대비',sys:'당신은 시험 준비 AI 튜터 아루입니다. 핵심 개념 요약·예상 문제(단답/서술)·암기 포인트·개념 연결고리를 제공하고 모범 답안도 포함하세요. 한국어로 답변하세요.'},
+  free:{lbl:'자유 질문',sys:'당신은 부산대학교 학생의 캠퍼스 비서 아루입니다. 학업 관련 질문에 친절하고 명확하게 한국어로 답변하세요.'}
+};
+
+// ╔══════════════════════════════════════════════════════╗
+//   SAVE HELPERS
+// ╚══════════════════════════════════════════════════════╝
+const S=k=>localStorage.setItem('aru_'+k,JSON.stringify(eval(k)));
+function saveAll(){S('tasks');S('classes');S('clubs');S('ddays');S('notes');S('settings');S('vaultMeta');updateBadge();updateHomeStats();}
+
+// ╔══════════════════════════════════════════════════════╗
+//   NAVIGATION
+// ╚══════════════════════════════════════════════════════╝
+function go(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const n=document.getElementById('nav-'+page);if(n)n.classList.add('active');
+  const handlers={tasks:renderTasks,timetable:renderTT,clubs:renderClubs,dday:renderDdays,notes:renderNotes,files:renderFiles,grade:initGrade,home:renderHome,settings:loadSettings};
+  if(handlers[page])handlers[page]();
+}
+
+// ╔══════════════════════════════════════════════════════╗
+//   MODAL
+// ╚══════════════════════════════════════════════════════╝
+function openModal(id){document.getElementById(id).classList.add('on');}
+function closeModal(id){document.getElementById(id).classList.remove('on');}
+
+// ╔══════════════════════════════════════════════════════╗
+//   TOAST
+// ╚══════════════════════════════════════════════════════╝
+function toast(msg,type='ok'){const t=document.getElementById('toast');t.textContent=msg;t.className='on '+type;clearTimeout(t._t);t._t=setTimeout(()=>t.className='',3000);}
+
+// ╔══════════════════════════════════════════════════════╗
+//   UTILS
+// ╚══════════════════════════════════════════════════════╝
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+function uid(){return Date.now()+Math.random();}
+function days(due){return Math.ceil((new Date(due)-new Date())/(864e5));}
+function f2b64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
+function getSubjects(){return (settings.subjects||'').split(',').map(s=>s.trim()).filter(Boolean);}
+
+function updateBadge(){
+  const urgent=tasks.filter(t=>!t.done&&t.due&&days(t.due)<=3).length;
+  const b=document.getElementById('task-badge');
+  b.style.display=urgent?'':'none';if(urgent)b.textContent=urgent;
+}
+
+// ╔══════════════════════════════════════════════════════╗
+//   HOME
+// ╚══════════════════════════════════════════════════════╝
+function renderHome(){
+  const now=new Date();
+  const dayNames=['일','월','화','수','목','금','토'];
+  const name=settings.name||'학우';
+  document.getElementById('home-greeting').textContent=`안녕하세요, ${name}님 👋`;
+  document.getElementById('home-date').textContent=`${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
+  updateHomeStats();
+
+  // today classes
+  const todayDay=now.getDay()-1; // 0=mon
+  const todayCls=classes.filter(c=>c.day===todayDay).sort((a,b)=>a.start.localeCompare(b.start));
+  const tc=document.getElementById('home-today-classes');
+  if(todayCls.length===0){tc.innerHTML='<div style="font-size:12px;color:var(--text3);">오늘 수업 없음 🎉</div>';}
+  else{tc.innerHTML=todayCls.map(c=>`<div class="today-class-item" style="border-color:${c.color||'var(--accent)'}"><div class="today-class-time">${c.start} ~ ${c.end}</div><div class="today-class-name">${c.name}</div><div class="today-class-room">${c.room||''}</div></div>`).join('');}
+
+  // deadlines
+  const upcoming=tasks.filter(t=>!t.done&&t.due).sort((a,b)=>new Date(a.due)-new Date(b.due)).slice(0,5);
+  const dd=document.getElementById('home-deadlines');
+  if(upcoming.length===0){dd.innerHTML='<div style="font-size:12px;color:var(--text3);">다가오는 마감 없음 🎉</div>';}
+  else{dd.innerHTML=upcoming.map(t=>{const d=days(t.due);const c=d<=1?'var(--red)':d<=3?'var(--amber)':'var(--text3)';return`<div class="deadline-item"><div class="deadline-dot" style="background:${c}"></div><div class="deadline-info"><div class="deadline-title">${t.title}</div><div class="deadline-sub">${t.subject||'과목없음'}</div></div><div class="deadline-due" style="color:${c}">D-${d}</div></div>`}).join('');}
+
+  // club events
+  const allEvents=clubs.flatMap(cl=>cl.events.map(e=>({...e,clubName:cl.name,clubEmoji:cl.emoji||'🎭'})));
+  const weekEvents=allEvents.filter(e=>e.date&&days(e.date)>=0&&days(e.date)<=7).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,4);
+  const ce=document.getElementById('home-club-events');
+  if(weekEvents.length===0){ce.innerHTML='<div style="font-size:12px;color:var(--text3);">이번 주 동아리 일정 없음</div>';}
+  else{ce.innerHTML=weekEvents.map(e=>`<div class="club-event"><div class="club-event-date">${e.date?.replace('T',' ').slice(5,16)||''}</div><div><div class="club-event-name">${e.clubEmoji} ${e.name}</div><div class="club-event-note">${e.place||''}</div></div></div>`).join('');}
+
+  // ddays
+  const ddEl=document.getElementById('home-ddays');
+  const top=ddays.slice(0,4).map(d=>{const n=days(d.date);const c=n<=3?'var(--red)':n<=7?'var(--amber)':'var(--accent2)';return`<div class="dday-item"><span class="dday-name">${d.emoji||'📌'} ${d.name}</span><span class="dday-num" style="color:${c}">D-${n<0?Math.abs(n)+'후':n}</span></div>`;}).join('');
+  ddEl.innerHTML=top||'<div style="font-size:12px;color:var(--text3);">등록된 D-day 없음</div>';
+}
+
+function updateHomeStats(){
+  const rem=tasks.filter(t=>!t.done).length;
+  const urgent=tasks.filter(t=>!t.done&&t.due&&days(t.due)<=3).length;
+  document.getElementById('hs-tasks').textContent=rem;
+  document.getElementById('hs-urgent').textContent=urgent;
+  document.getElementById('hs-files').textContent=vaultMeta.length;
+}
+
+// ╔══════════════════════════════════════════════════════╗
+//   TIMETABLE
+// ╚══════════════════════════════════════════════════════╝
+function renderTT(){
+  const tbody=document.getElementById('tt-body');
+  tbody.innerHTML='';
+  HOURS.forEach(h=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="tt-time">${h}:00</td>${DAYS.map((_,d)=>`<td class="tt-cell" data-day="${d}" data-hour="${h}"></td>`).join('')}`;
+    tbody.appendChild(tr);
+  });
+  classes.forEach(c=>{
+    const startH=parseInt(c.start);
+    const startM=parseInt(c.start.split(':')[1]);
+    const endH=parseInt(c.end);
+    const endM=parseInt(c.end.split(':')[1]);
+    const rowIdx=HOURS.indexOf(startH);
+    if(rowIdx<0)return;
+    const cell=tbody.rows[rowIdx]?.cells[c.day+1];
+    if(!cell)return;
+    const span=document.createElement('div');
+    const pct=((endH*60+endM)-(startH*60+startM))/60;
+    span.className='tt-class';
+    span.style.cssText=`background:${c.color||'var(--accent)'};color:#fff;min-height:${Math.max(38,pct*42)}px;`;
+    span.innerHTML=`<div class="tt-class-name">${c.name}</div><div class="tt-class-room">${c.room||''}</div><div class="tt-class-prof">${c.prof||''}</div>`;
+    span.onclick=()=>{if(confirm(`"${c.name}" 수업을 삭제할까요?`)){classes=classes.filter(x=>x.id!==c.id);S('classes');renderTT();}};
+    cell.appendChild(span);
+  });
+  // add buttons in empty cells
+  tbody.querySelectorAll('td.tt-cell').forEach(cell=>{
+    if(!cell.querySelector('.tt-class')){
+      const btn=document.createElement('button');
+      btn.className='tt-add-btn';btn.textContent='+';
+      btn.onclick=()=>showAddClass(+cell.dataset.day,+cell.dataset.hour);
+      cell.appendChild(btn);
+    }
+  });
+}
+
+function showAddClass(day=0,hour=9){
+  document.getElementById('cl-day').value=day;
+  document.getElementById('cl-start').value=`${String(hour).padStart(2,'0')}:00`;
+  document.getElementById('cl-end').value=`${String(hour+1).padStart(2,'0')}:30`;
+  document.getElementById('cl-name').value='';
+  document.getElementById('cl-room').value='';
+  document.getElementById('cl-prof').value='';
+  // color picker
+  const cp=document.getElementById('color-picker');
+  cp.innerHTML=CLASS_COLORS.map(col=>`<div onclick="selectedColor='${col}';document.querySelectorAll('.cp-dot').forEach(d=>d.style.outline='none');this.style.outline='2px solid white';" class="cp-dot" style="width:20px;height:20px;border-radius:50%;background:${col};cursor:pointer;outline:${col===selectedColor?'2px solid white':'none'};"></div>`).join('');
+  openModal('m-addclass');
+}
+
+function saveClass(){
+  const name=document.getElementById('cl-name').value.trim();
+  if(!name){toast('과목명을 입력해주세요','err');return;}
+  classes.push({id:uid(),name,day:+document.getElementById('cl-day').value,start:document.getElementById('cl-start').value,end:document.getElementById('cl-end').value,room:document.getElementById('cl-room').value,prof:document.getElementById('cl-prof').value,color:selectedColor});
+  S('classes');closeModal('m-addclass');renderTT();toast('수업 추가됨 ✅');
+}
+
+function clearTT(){if(confirm('시간표를 모두 삭제할까요?')){classes=[];S('classes');renderTT();}}
+
+// ╔══════════════════════════════════════════════════════╗
+//   TASKS
+// ╚══════════════════════════════════════════════════════╝
+const TYPE_LBL={hw:'과제',exam:'시험',report:'리포트',proj:'프로젝트',etc:'기타'};
+const TYPE_CLS={hw:'tag-blue',exam:'tag-red',report:'tag-amber',proj:'tag-green',etc:'tag-purple'};
+
+function openAddTask(){openModal('m-addtask');document.getElementById('t-title').value='';document.getElementById('t-subject').value='';document.getElementById('t-due').value='';document.getElementById('t-note').value='';}
+
+function saveTask(){
+  const title=document.getElementById('t-title').value.trim();
+  if(!title){toast('과제명을 입력하세요','err');return;}
+  tasks.push({id:uid(),title,subject:document.getElementById('t-subject').value,type:document.getElementById('t-type').value,due:document.getElementById('t-due').value,note:document.getElementById('t-note').value,done:false,created:new Date().toISOString()});
+  S('tasks');closeModal('m-addtask');renderTasks();toast('과제 추가됨 ✅');updateBadge();
+}
+
+function toggleTask(id){const t=tasks.find(x=>x.id==id);if(t){t.done=!t.done;S('tasks');renderTasks();updateBadge();}}
+function deleteTask(id){if(confirm('삭제할까요?')){tasks=tasks.filter(t=>t.id!=id);S('tasks');renderTasks();updateBadge();}}
+function sortByDue(){tasks.sort((a,b)=>{if(!a.due)return 1;if(!b.due)return -1;return new Date(a.due)-new Date(b.due);});S('tasks');renderTasks();}
+
+function renderTasks(){
+  const filter=document.getElementById('task-filter').value;
+  let list=[...tasks];
+  if(filter!=='all')list=list.filter(t=>t.type===filter);
+  list.sort((a,b)=>a.done-b.done);
+  const el=document.getElementById('task-list');
+  const emp=document.getElementById('task-empty');
+  if(list.length===0){el.innerHTML='';emp.style.display='';return;}
+  emp.style.display='none';
+  el.innerHTML=list.map(t=>{
+    let dueHtml='';
+    if(t.due){const d=days(t.due);const dt=new Date(t.due).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});const c=d<=0?'var(--red)':d<=1?'var(--red)':d<=3?'var(--amber)':'var(--text3)';dueHtml=`<span style="font-size:11px;color:${c};font-weight:${d<=3?600:400};">${dt} (D-${d})</span>`;}
+    return`<div class="task-item ${t.done?'done':''}">
+      <div class="task-check" onclick="toggleTask(${t.id})">${t.done?'✓':''}</div>
+      <div class="task-body">
+        <div class="task-title">${t.title}</div>
+        <div class="task-meta">
+          ${t.subject?`<span class="tag tag-purple">${t.subject}</span>`:''}
+          <span class="tag ${TYPE_CLS[t.type]||'tag-purple'}">${TYPE_LBL[t.type]||'기타'}</span>
+          ${dueHtml}
+        </div>
+        ${t.note?`<div style="font-size:11px;color:var(--text3);margin-top:3px;">${t.note}</div>`:''}
+      </div>
+      <div class="task-del" onclick="deleteTask(${t.id})">✕</div>
+    </div>`;
+  }).join('');
+
+  // stats
+  const total=tasks.length,done=tasks.filter(t=>t.done).length,urg=tasks.filter(t=>!t.done&&t.due&&days(t.due)<=3).length;
+  document.getElementById('task-stats').innerHTML=
+    `<div style="display:flex;flex-direction:column;gap:7px;">
+      ${[['전체',total,'var(--text)'],['진행 중',total-done,'var(--accent2)'],['완료',done,'var(--green)'],['3일 내 마감',urg,'var(--red)']].map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text2)">${l}</span><span style="font-weight:600;color:${c}">${v}</span></div>`).join('')}
+    </div>`;
+  const up=tasks.filter(t=>!t.done&&t.due).sort((a,b)=>new Date(a.due)-new Date(b.due)).slice(0,5);
+  document.getElementById('task-upcoming').innerHTML=up.length===0?'<div style="font-size:12px;color:var(--text3);">임박 마감 없음 🎉</div>':up.map(t=>{const d=days(t.due);const c=d<=1?'var(--red)':d<=3?'var(--amber)':'var(--text2)';return`<div style="padding:7px 0;border-bottom:1px solid var(--border);"><div style="font-size:12.5px;font-weight:500;color:var(--text)">${t.title}</div><div style="font-size:11px;color:${c};margin-top:2px;">D-${d} · ${t.subject||'—'}</div></div>`;}).join('');
+}
+
+// ╔══════════════════════════════════════════════════════╗
+//   CLUBS
+// ╚══════════════════════════════════════════════════════╝
+function showAddClub(){openModal('m-addclub');['cb-name','cb-emoji','cb-role','cb-note'].forEach(id=>document.getElementById(id).value='');}
+
+function saveClub(){
+  const name=document.getElementById('cb-name').value.trim();
+  if(!name){toast('동아리 이름을 입력하세요','err');return;}
+  clubs.push({id:uid(),name,emoji:document.getElementById('cb-emoji').value||'🎭',role:document.getElementById('cb-role').value,note:document.getElementById('cb-note').value,events:[]});
+  S('clubs');closeModal('m-addclub');renderClubs();toast('동아리 추가됨 ✅');
+}
+
+function selectClub(id){
+  selectedClubId=id;renderClubs();
+  const c=clubs.find(x=>x.id==id);
+  if(!c)return;
+  document.getElementById('club-detail-title').textContent=`${c.emoji} ${c.name} — 일정`;
+  document.getElementById('add-event-btn').style.display='';
+  renderClubEvents(c);
+}
+
+function renderClubs(){
+  const el=document.getElementById('club-list');
+  const emp=document.getElementById('club-empty');
+  if(clubs.length===0){el.innerHTML='';emp.style.display='';return;}
+  emp.style.display='none';
+  el.innerHTML=clubs.map(c=>`<div class="club-card ${c.id==selectedClubId?'selected':''}" onclick="selectClub(${c.id})">
+    <div class="club-card-header"><div class="club-emoji">${c.emoji||'🎭'}</div><div><div class="club-name">${c.name}</div><div class="club-role">${c.role||'부원'}</div></div></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;">
+      <div class="chip" onclick="event.stopPropagation();if(confirm('삭제?')){clubs=clubs.filter(x=>x.id!=${c.id});S('clubs');selectedClubId=null;renderClubs();document.getElementById('club-events-list').innerHTML='';document.getElementById('club-events-empty').style.display='none';}">삭제</div>
+    </div>
+  </div>`).join('');
+  if(selectedClubId){const c=clubs.find(x=>x.id==selectedClubId);if(c)renderClubEvents(c);}
+}
+
+function renderClubEvents(c){
+  const el=document.getElementById('club-events-list');
+  const emp=document.getElementById('club-events-empty');
+  if(!c||c.events.length===0){el.innerHTML='';emp.style.display='';return;}
+  emp.style.display='none';
+  el.innerHTML=[...c.events].sort((a,b)=>new Date(a.date)-new Date(b.date)).map(e=>`<div class="club-event">
+    <div class="club-event-date">${e.date?.replace('T',' ').slice(0,16)||'날짜 없음'}</div>
+    <div style="flex:1;"><div class="club-event-name">${e.name}</div><div class="club-event-note">${e.place||''} ${e.note||''}</div></div>
+    <div class="chip del" onclick="deleteClubEvent(${c.id},${e.id})">✕</div>
+  </div>`).join('');
+}
+
+function showAddClubEvent(){if(!selectedClubId){toast('동아리를 먼저 선택하세요','err');return;}openModal('m-addclubevent');['ce-name','ce-place','ce-note'].forEach(id=>document.getElementById(id).value='');}
+
+function saveClubEvent(){
+  const c=clubs.find(x=>x.id==selectedClubId);if(!c)return;
+  const name=document.getElementById('ce-name').value.trim();
+  if(!name){toast('일정명을 입력하세요','err');return;}
+  c.events.push({id:uid(),name,date:document.getElementById('ce-date').value,place:document.getElementById('ce-place').value,note:document.getElementById('ce-note').value});
+  S('clubs');closeModal('m-addclubevent');renderClubEvents(c);toast('일정 추가됨 ✅');
+}
+
+function deleteClubEvent(clubId,evId){
+  const c=clubs.find(x=>x.id==clubId);if(!c)return;
+  c.events=c.events.filter(e=>e.id!=evId);S('clubs');renderClubEvents(c);
+}
+
+// ╔══════════════════════════════════════════════════════╗
+//   D-DAY
+// ╚══════════════════════════════════════════════════════╝
+function showAddDday(){openModal('m-adddday');['dd-name','dd-emoji','dd-date'].forEach(id=>document.getElementById(id).value='');}
+
+function saveDday(){
+  const name=document.getElementById('dd-name').value.trim();
+  const date=document.getElementById('dd-date').value;
+  if(!name||!date){toast('이름과 날짜를 입력하세요','err');return;}
+  ddays.push({id:uid(),name,date,emoji:document.getElementById('dd-emoji').value||'📌'});
+  S('ddays');closeModal('m-adddday');renderDdays();toast('D-day 추가됨 ✅');
+}
+
+function renderDdays(){
+  const grid=document.getElementById('dday-grid');
+  const emp=document.getElementById('dday-empty');
+  if(ddays.length===0){grid.innerHTML='';emp.style.display='';return;}
+  emp.style.display='none';
+  const sorted=[...ddays].sort((a,b)=>Math.abs(days(a.date))-Math.abs(days(b.date)));
+  grid.innerHTML=sorted.map(d=>{
+    const n=days(d.date);
+    const abs=Math.abs(n);
+    const past=n<0;
+    const c=!past&&n<=3?'var(--red)':!past&&n<=7?'var(--amber)':'var(--accent2)';
+    return`<div class="dday-card">
+      <div style="font-size:28px;">${d.emoji}</div>
+      <div class="dday-card-num" style="color:${c}">${past?'+'+abs:'D-'+n}</div>
+      <div class="dday-card-name">${d.name}</div>
+      <div class="dday-card-date">${new Date(d.date).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})}</div>
+      <div class="dday-actions">
+        <div class="chip del" onclick="ddays=ddays.filter(x=>x.id!=${d.id});S('ddays');renderDdays();">삭제</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ╔══════════════════════════════════════════════════════╗
+//   NOTES
+// ╚══════════════════════════════════════════════════════╝
+function renderNotes(){
+  const el=document.getElementById('notes-list');
+  const emp=document.getElementById('notes-empty');
+  if(notes.length===0){el.innerHTML='';emp.style.display='';return;}
+  emp.style.display='none';
+  el.innerHTML=notes.map(n=>`<div class="note-item ${n.id==currentNoteId?'active':''}" onclick="openNote(${n.id})">
+    <div class="note-title">${n.title||'제목 없음'}</div>
+    <div class="note-preview">${(n.body||'').slice(0,40)||'내용 없음'}</div>
+  </div>`).join('');
+  updateNoteSubjects();
+}
+
+function newNote(){
+  const n={id:uid(),title:'새 노트',body:'',subject:'',updated:new Date().toISOString()};
+  notes.unshift(n);S('notes');currentNoteId=n.id;renderNotes();openNote(n.id);
+}
+
+function openNote(id){
+  currentNoteId=id;
+  const n=notes.find(x=>x.id==id);if(!n)return;
+  document.getElementById('note-editor').style.display='flex';
+  document.getElementById('note-placeholder').style.display='none';
+  document.getElementById('note-title-input').value=n.title||'';
+  document.getElementById('note-body').value=n.body||'';
+  document.getElementById('note-subject-sel').value=n.subject||'';
+  renderNotes();
+}
+
+function saveCurrentNote(){
+  const n=notes.find(x=>x.id==currentNoteId);if(!n)return;
+  n.title=document.getElementById('note-title-input').value||'제목 없음';
+  n.body=document.getElementById('note-body').value;
+  n.subject=document.getElementById('note-subject-sel').value;
+  n.updated=new Date().toISOString();
+  S('notes');renderNotes();toast('저장됨 ✅');
+}
+
+function deleteCurrentNote(){
+  if(!confirm('이 노트를 삭제할까요?'))return;
+  notes=notes.filter(x=>x.id!=currentNoteId);
+  currentNoteId=null;S('notes');
+  document.getElementById('note-editor').style.display='none';
+  document.getElementById('note-placeholder').style.display='';
+  renderNotes();
+}
+
+function updateNoteSubjects(){
+  const sel=document.getElementById('note-subject-sel');
+  const cur=sel.value;
+  const subs=getSubjects();
+  sel.innerHTML='<option value="">과목 선택...</option>'+subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+  sel.value=cur;
+}
+
+// Auto-save on blur
+document.getElementById('note-body').addEventListener('blur',()=>{if(currentNoteId)saveCurrentNote();});
+document.getElementById('note-title-input').addEventListener('blur',()=>{if(currentNoteId)saveCurrentNote();});
+
+// ╔══════════════════════════════════════════════════════╗
+//   FILES
+// ╚══════════════════════════════════════════════════════╝
+async function uploadVault(e){
+  for(const file of e.target.files){
+    if(file.size>10*1024*1024){toast('10MB 이하만 가능합니다','err');continue;}
+    const data=await f2b64(file);
+    const id=uid();
+    const sub=guessSubject(file.name);
+    vaultMeta.push({id,name:file.name,size:file.size,type:file.type,subject:sub,uploaded:new Date().toLocaleDateString('ko-KR')});
+    try{localStorage.setItem('aru_fd_'+id,data);}catch(er){toast('저장 공간 부족','err');}
+  }
+  S('vaultMeta');renderFiles();toast('업로드 완료 ✅');e.target.value='';
+}
+
+function guessSubject(name){
+  const subs=getSubjects();
+  for(const s of subs)if(name.includes(s))return s;
+  const m={경제:'경제학',수학:'수학',math:'수학',영어:'영어',english:'영어',os:'운영체제',운영:'운영체제',프로그:'프로그래밍',물리:'물리학',화학:'화학',역사:'역사학'};
+  for(const[k,v]of Object.entries(m))if(name.toLowerCase().includes(k))return v;
+  return '미분류';
+}
+
+function renderFiles(){
+  const area=document.getElementById('files-area');
+  if(vaultMeta.length===0){area.innerHTML='<div class="empty"><div class="empty-icon">📂</div><h3>파일 없음</h3><p>위에서 업로드하세요</p></div>';return;}
+  const bySubj={};
+  vaultMeta.forEach(f=>{const s=f.subject||'미분류';if(!bySubj[s])bySubj[s]=[];bySubj[s].push(f);});
+  area.innerHTML=Object.entries(bySubj).map(([sub,files])=>`
+    <div style="margin-bottom:22px;">
+      <div style="font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">${sub} (${files.length})</div>
+      <div class="grid-auto">${files.map(f=>`<div class="file-card"><div class="file-icon">${ficon(f.name)}</div><div class="file-name">${f.name}</div><div class="file-meta">${f.uploaded} · ${fsize(f.size)}</div><div class="file-actions"><div class="chip" onclick="askFile('${f.id}')">AI 질문 →</div><div class="chip" onclick="editSub('${f.id}')">과목변경</div><div class="chip del" onclick="delFile('${f.id}')">삭제</div></div></div>`).join('')}</div>
+    </div>`).join('');
+}
+
+function ficon(n){const e=n.split('.').pop().toLowerCase();return{pdf:'📄',pptx:'📊',ppt:'📊',docx:'📝',doc:'📝',hwp:'📝',txt:'📃',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'🖼️',webp:'🖼️'}[e]||'📎';}
+function fsize(b){if(!b)return'—';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
+
+function askFile(id){
+  const f=vaultMeta.find(x=>x.id==id);if(!f)return;
+  const data=localStorage.getItem('aru_fd_'+id);
+  if(data){
+    chatAttached=[{name:f.name,data,type:f.type.includes('pdf')?'pdf':'image',mediaType:f.type}];
+    renderChatAttached();
+  }
+  go('chat');toast(`"${f.name}" 첨부됨. 질문하세요!`);
+}
+
+function editSub(id){
+  const f=vaultMeta.find(x=>x.id==id);if(!f)return;
+  const s=prompt('과목명:',f.subject||'');if(s!==null){f.subject=s;S('vaultMeta');renderFiles();}
+}
+
+function delFile(id){
+  if(!confirm('삭제할까요?'))return;
+  vaultMeta=vaultMeta.filter(x=>x.id!=id);
+  localStorage.removeItem('aru_fd_'+id);
+  S('vaultMeta');renderFiles();updateHomeStats();
+}
+
+function doDragOver(e){e.preventDefault();document.getElementById('upload-zone').classList.add('drag');}
+function doDragLeave(){document.getElementById('upload-zone').classList.remove('drag');}
+function doDrop(e){
+  e.preventDefault();doDragLeave();
+  const dt=new DataTransfer();
+  [...e.dataTransfer.files].forEach(f=>dt.items.add(f));
+  document.getElementById('vault-input').files=dt.files;
+  uploadVault({target:document.getElementById('vault-input')});
+}
+
+// ╔══════════════════════════════════════════════════════╗
+//   AI CHAT
+// ╚══════════════════════════════════════════════════════╝
+function setMode(m){
+  currentMode=m;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('on'));
+  document.getElementById('m-'+m).classList.add('on');
+  document.getElementById('mode-lbl').textContent=MODE_CFG[m].lbl;
+}
+
+function getSystemPrompt(){
+  let s=MODE_CFG[currentMode].sys;
+  if(settings.major)s+=` 학생 전공: ${settings.major}.`;
+  if(settings.year)s+=` ${settings.year}학년.`;
+  return s;
+}
+
+async function sendChat(){
+  const ta=document.getElementById('chat-ta');
+  const text=ta.value.trim();if(!text)return;
+  document.getElementById('welcome')?.remove();
+  addMsg('user',text);ta.value='';autoResize(ta);
+  const content=[];
+  chatAttached.forEach(f=>{
+    if(f.type==='pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:f.data}});
+    else content.push({type:'image',source:{type:'base64',media_type:f.mediaType,data:f.data}});
+  });
+  content.push({type:'text',text});
+  chatHistory.push({role:'user',content:content.length===1?text:content});
+  const tid=addTyping();
+  document.getElementById('send-btn').disabled=true;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:getSystemPrompt(),messages:chatHistory})});
+    const d=await r.json();
+    const reply=d.content?.map(b=>b.text||'').join('')||'오류가 발생했습니다.';
+    removeTyping(tid);addMsg('ai',reply);chatHistory.push({role:'assistant',content:reply});
+  }catch(e){removeTyping(tid);addMsg('ai','⚠️ 오류가 발생했어요. 다시 시도해주세요.');}
+  document.getElementById('send-btn').disabled=false;
+  chatAttached=[];renderChatAttached();
+}
+
+function addMsg(role,text){
+  const msgs=document.getElementById('messages');
+  const av=role==='user'?(settings.name?settings.name[0]:'나'):`<img src="icon-192.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.outerHTML='✦'">`;
+  const el=document.createElement('div');el.className='msg '+role;
+  el.innerHTML=`<div class="av">${av}</div><div class="bubble">${esc(text)}</div>`;
+  msgs.appendChild(el);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function addTyping(){
+  const msgs=document.getElementById('messages');
+  const id='t'+Date.now();
+  const el=document.createElement('div');el.className='msg ai';el.id=id;
+  el.innerHTML=`<div class="av" style="overflow:hidden;padding:0;"><img src="icon-192.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.outerHTML='✦'"></div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(el);msgs.scrollTop=msgs.scrollHeight;return id;
+}
+function removeTyping(id){document.getElementById(id)?.remove();}
+function clearChat(){chatHistory=[];chatAttached=[];renderChatAttached();const m=document.getElementById('messages');m.innerHTML='<div class="welcome" id="welcome"><h2>대화 초기화됨 ✦</h2><p>새 질문을 시작해보세요.</p></div>';}
+function qp(t){document.getElementById('chat-ta').value=t;sendChat();}
+
+async function attachChatFile(e){
+  for(const file of e.target.files){
+    if(file.size>10*1024*1024){toast('10MB 이하만 첨부 가능','err');continue;}
+    const data=await f2b64(file);
+    chatAttached.push({name:file.name,data,type:file.type.includes('pdf')?'pdf':'image',mediaType:file.type});
+  }
+  renderChatAttached();e.target.value='';
+}
+
+function renderChatAttached(){
+  const el=document.getElementById('chat-attached');
+  el.innerHTML=chatAttached.map((f,i)=>`<div class="attached-file"><span style="font-size:16px;">${f.type==='pdf'?'📄':'🖼️'}</span><span class="af-name">${f.name}</span><span class="af-rm" onclick="chatAttached.splice(${i},1);renderChatAttached();">✕</span></div>`).join('');
+}
+
+document.getElementById('chat-ta').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}autoResize(e.target);});
+document.getElementById('chat-ta').addEventListener('input',e=>autoResize(e.target));
+
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,140)+'px';}
+
+// ╔══════════════════════════════════════════════════════╗
+//   GRADE
+// ╚══════════════════════════════════════════════════════╝
+function initGrade(){
+  if(!document.getElementById('grade-rows').children.length){addGradeRow();addGradeRow();addGradeRow();}
+  renderGradeRef();
+}
+
+function addGradeRow(){
+  const rows=document.getElementById('grade-rows');
+  const id='gr'+Date.now();
+  const d=document.createElement('div');d.id=id;d.className='grade-row';
+  d.innerHTML=`<input type="text" class="fi" placeholder="과목명" style="font-size:11.5px;padding:5px 7px;"><input type="number" class="fi" value="3" min="1" max="6" style="font-size:11.5px;padding:5px 7px;text-align:center;"><select class="fi" style="font-size:11.5px;padding:5px 4px;">${Object.keys(GRADE_MAP).map(g=>`<option>${g}</option>`).join('')}</select><button onclick="document.getElementById('${id}').remove();calcGPA();" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;">✕</button>`;
+  rows.appendChild(d);
+}
+
+function calcGPA(){
+  const rows=document.getElementById('grade-rows').children;
+  let pts=0,creds=0;
+  for(const row of rows){
+    const ins=row.querySelectorAll('input,select');
+    const cr=parseFloat(ins[1].value)||0;
+    const gp=GRADE_MAP[ins[2].value]??0;
+    if(cr>0){pts+=gp*cr;creds+=cr;}
+  }
+  if(!creds){toast('학점을 입력하세요','err');return;}
+  const gpa=pts/creds;
+  const el=document.getElementById('gpa-disp');
+  el.textContent=gpa.toFixed(2);
+  const c=gpa>=4.0?'var(--green)':gpa>=3.0?'var(--accent2)':gpa>=2.0?'var(--amber)':'var(--red)';
+  el.style.color=c;
+  const rank=gpa>=4.3?'최우수 A+':gpa>=4.0?'우수 A':gpa>=3.5?'상위권 B+':gpa>=3.0?'평균 이상 B':gpa>=2.0?'평균 C':'주의';
+  document.getElementById('gpa-stats').innerHTML=[['총 학점',creds+'학점'],['합산점',pts.toFixed(2)],['평균',gpa.toFixed(2)],['등급',rank]].map(([l,v])=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text2)">${l}</span><span style="font-weight:600;color:${c}">${v}</span></div>`).join('');
+  toast('계산 완료!');
+}
+
+function simGPA(){
+  const target=parseFloat(document.getElementById('target-gpa').value)||3.5;
+  const curCr=parseFloat(document.getElementById('cur-credits').value)||0;
+  const rows=document.getElementById('grade-rows').children;
+  let pts=0,creds=0;
+  for(const r of rows){const ins=r.querySelectorAll('input,select');const cr=parseFloat(ins[1].value)||0;if(cr>0){pts+=( GRADE_MAP[ins[2].value]??0)*cr;creds+=cr;}}
+  const el=document.getElementById('sim-result');el.style.display='';
+  if(!creds||!curCr){el.innerHTML='학점 정보를 입력하세요.';return;}
+  const needed=(target*(curCr+creds)-pts)/curCr;
+  const c=needed<=4.5&&needed>=0?'var(--green)':'var(--red)';
+  el.innerHTML=needed>4.5?`목표 GPA ${target} 달성이 이번 학기만으로는 어렵습니다.`:needed<0?`🎉 이번 학기 성적만으로도 목표 ${target} 초과 달성 가능합니다!`:`목표 GPA <strong style="color:var(--accent2)">${target}</strong> 달성을 위해 이전 누적 평점이 <strong style="color:${c}">${needed.toFixed(2)}</strong> 이상이어야 합니다.`;
+}
+
+function renderGradeRef(){
+  const entries=Object.entries(GRADE_MAP);
+  document.getElementById('grade-ref-table').innerHTML=`<table style="width:100%;border-collapse:collapse;">${entries.map(([g,p])=>`<tr style="border-bottom:1px solid var(--border);"><td style="padding:3px 5px;font-size:11.5px;color:var(--text2);">${g}</td><td style="padding:3px 5px;font-size:11.5px;font-weight:600;color:var(--text);">${p}</td></tr>`).join('')}</table>`;
+}
+
+// ╔══════════════════════════════════════════════════════╗
+//   PARSE
+// ╚══════════════════════════════════════════════════════╝
+async function runParse(){
+  const input=document.getElementById('parse-input').value.trim();
+  if(!input){toast('내용을 붙여넣어주세요','err');return;}
+  const btn=document.getElementById('parse-btn');btn.disabled=true;btn.textContent='분석 중...';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:'대학교 플라토 공지·강의계획서 텍스트에서 과제·시험·퀴즈 등 마감 일정을 추출하세요. 반드시 JSON 배열만 반환하세요 (다른 텍스트 없음): [{"title":"과제명","subject":"과목명","type":"hw|exam|proj|report","due":"YYYY-MM-DDTHH:mm","note":"메모"}]',messages:[{role:'user',content:'파싱:\n\n'+input}]})});
+    const d=await r.json();
+    const raw=d.content?.map(b=>b.text||'').join('')||'[]';
+    parsedItems=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    renderParseResult();
+  }catch(e){toast('파싱 실패. 다시 시도하세요','err');}
+  btn.disabled=false;btn.textContent='아루야, 파싱해줘 ✦';
+}
+
+function renderParseResult(){
+  const area=document.getElementById('parse-result');
+  if(!parsedItems.length){toast('일정을 찾지 못했어요','err');return;}
+  area.style.display='';
+  document.getElementById('parse-items').innerHTML=parsedItems.map((t,i)=>`<div class="parsed-item">
+    <input type="checkbox" id="pi-${i}" checked style="margin-top:2px;accent-color:var(--accent);">
+    <div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">${t.title}</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;">
+      ${t.subject?`<span class="tag tag-purple">${t.subject}</span>`:''}
+      <span class="tag ${TYPE_CLS[t.type]||'tag-blue'}">${TYPE_LBL[t.type]||'과제'}</span>
+      ${t.due?`<span style="font-size:11px;color:var(--text3);">📅 ${t.due.replace('T',' ')}</span>`:''}
+    </div>${t.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">${t.note}</div>`:''}
+    </div></div>`).join('');
+  toast(`${parsedItems.length}개 항목 파싱 완료 ✅`);
+}
+
+function registerParsed(){
+  let cnt=0;
+  parsedItems.forEach((t,i)=>{
+    if(document.getElementById('pi-'+i)?.checked){
+      tasks.push({id:uid(),title:t.title,subject:t.subject||'',type:t.type||'hw',due:t.due||'',note:t.note||'',done:false,created:new Date().toISOString()});cnt++;
+    }
+  });
+  S('tasks');updateBadge();
+  toast(`${cnt}개 과제 등록됨 ✅`);
+  document.getElementById('parse-result').style.display='none';
+  document.getElementById('parse-input').value='';
+  parsedItems=[];
+}
+
+// ╔══════════════════════════════════════════════════════╗
+//   CODE HELPER
+// ╚══════════════════════════════════════════════════════╝
+let currentCodeMode = 'explain';
+const CODE_MODES = {
+  explain: { lbl:'코드 설명', sys:'당신은 컴퓨터공학 전공 학생을 돕는 AI 코드 분석가 아루입니다. 주어진 코드를 분석해서: 1) 코드의 전체 목적, 2) 각 부분의 동작 원리, 3) 사용된 자료구조/알고리즘, 4) 시간복잡도와 공간복잡도, 5) 주의할 점을 명확히 설명하세요. 한국어로 답변하세요.' },
+  debug:   { lbl:'디버깅', sys:'당신은 코드 디버깅 전문 AI 아루입니다. 주어진 코드에서: 1) 버그나 오류 원인 찾기, 2) 수정된 코드 제시, 3) 왜 오류가 발생했는지 설명, 4) 유사한 실수를 피하는 팁을 제공하세요. 수정 코드는 반드시 포함해주세요. 한국어로 답변하세요.' },
+  review:  { lbl:'코드 리뷰', sys:'당신은 시니어 개발자처럼 코드 리뷰를 해주는 AI 아루입니다. 1) 코드 품질 평가, 2) 성능 개선점, 3) 가독성/유지보수성, 4) 더 Pythonic/관용적인 방식, 5) 잠재적 문제점을 리뷰해주세요. 구체적인 개선 코드도 제시하세요. 한국어로 답변하세요.' },
+  algo:    { lbl:'알고리즘', sys:'당신은 알고리즘 전문 AI 튜터 아루입니다. 주어진 코드/문제에 대해 1) 사용된 알고리즘 식별 및 설명, 2) 시간복잡도/공간복잡도 분석, 3) 더 효율적인 접근 방식, 4) 동작 예시(trace)를 제공하세요. 수식도 포함해서 명확히 설명하세요. 한국어로 답변하세요.' },
+  convert: { lbl:'언어 변환', sys:'당신은 코드 언어 변환 전문 AI 아루입니다. 주어진 코드를 지정된 언어로 변환하되: 1) 변환된 전체 코드, 2) 언어별 문법 차이점 설명, 3) 주의사항을 제공하세요. 변환 코드는 해당 언어의 관용적 스타일을 따르세요. 한국어로 답변하세요.' },
+  generate:{ lbl:'코드 생성', sys:'당신은 코드 생성 전문 AI 아루입니다. 요구사항을 분석해 깔끔하고 효율적인 코드를 작성하세요. 1) 완성된 코드, 2) 코드 설명, 3) 사용 예시, 4) 시간복잡도를 포함하세요. 가독성 있고 주석이 달린 코드를 작성하세요. 한국어로 답변하세요.' },
+  test:    { lbl:'테스트 케이스', sys:'당신은 소프트웨어 테스팅 전문 AI 아루입니다. 주어진 코드/함수에 대해 1) 정상 케이스, 2) 경계 케이스(엣지 케이스), 3) 예외 케이스(빈 입력, null, 음수 등)를 포함한 테스트 케이스를 생성하세요. 언어에 맞는 테스트 코드도 작성하세요. 한국어로 답변하세요.' },
+  comment: { lbl:'주석 달기', sys:'당신은 코드 문서화 전문 AI 아루입니다. 주어진 코드에 상세한 주석을 추가하세요: 함수/클래스에는 docstring, 핵심 로직에는 인라인 주석, 복잡한 부분에는 상세 설명을 달아주세요. 한국어 주석으로 작성하고 전체 주석이 달린 코드를 반환하세요. 한국어로 답변하세요.' },
+};
+
+function setCodeMode(m) {
+  currentCodeMode = m;
+  document.querySelectorAll('.code-mode-btn').forEach(b => b.classList.remove('on'));
+  document.getElementById('cm-' + m).classList.add('on');
+  document.getElementById('code-mode-hint').textContent = '모드: ' + CODE_MODES[m].lbl;
+}
+
+async function runCodeAI() {
+  const code = document.getElementById('code-input').value.trim();
+  const lang = document.getElementById('code-lang').value;
+  const question = document.getElementById('code-question').value.trim();
+  const targetLang = document.getElementById('target-lang').value;
+  if (!code && currentCodeMode !== 'generate') { toast('코드를 입력해주세요', 'err'); return; }
+  const btn = document.getElementById('code-run-btn');
+  btn.disabled = true; btn.textContent = '분석 중...';
+  const output = document.getElementById('code-output');
+  output.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);"><div style="font-size:24px;margin-bottom:8px;">⚙️</div>아루가 분석하고 있어요...</div>';
+
+  let prompt = '';
+  if (currentCodeMode === 'convert') {
+    prompt = `다음 ${lang} 코드를 ${targetLang}로 변환해줘:\n\n\`\`\`${lang}\n${code}\n\`\`\``;
+  } else if (currentCodeMode === 'generate') {
+    prompt = question || code || '간단한 예제 코드를 생성해줘';
+    if (code) prompt = `다음 요구사항으로 ${lang} 코드를 생성해줘:\n${code}\n${question ? '\n추가 요구사항: ' + question : ''}`;
+  } else {
+    prompt = `다음 ${lang} 코드를 분석해줘:\n\n\`\`\`${lang}\n${code}\n\`\`\`${question ? '\n\n추가 질문: ' + question : ''}`;
+  }
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+        system: CODE_MODES[currentCodeMode].sys, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await resp.json();
+    const reply = data.content?.map(b => b.text || '').join('') || '오류 발생';
+    // Render with code block detection
+    output.innerHTML = renderCodeOutput(reply);
+    window._lastCodeOutput = reply;
+  } catch(e) {
+    output.innerHTML = '<div style="color:var(--red);padding:14px;">⚠️ 오류가 발생했어요. 다시 시도해주세요.</div>';
+  }
+  btn.disabled = false; btn.textContent = '아루야, 분석해줘 ✦';
+}
+
+function renderCodeOutput(text) {
+  // Convert markdown-ish code blocks to styled divs
+  let html = text
+    .replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+      `<pre class="out-code">${esc2(code.trim())}</pre>`)
+    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--accent2)">$1</strong>')
+    .replace(/^#{1,3} (.+)$/gm, '<h4 style="color:var(--accent2);font-size:13px;margin:12px 0 6px;">$1</h4>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+  return `<div style="padding:4px;">${html}</div>`;
+}
+
+function esc2(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function clearCodeOutput() {
+  document.getElementById('code-output').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);"><div style="font-size:32px;margin-bottom:10px;">💻</div><div style="font-size:13px;">코드를 입력하고 분석을 요청하면<br>아루가 여기에 결과를 보여드려요</div></div>';
+}
+
+function copyCodeOutput() {
+  if (window._lastCodeOutput) {
+    navigator.clipboard.writeText(window._lastCodeOutput).then(() => toast('복사됨 ✅'));
+  }
+}
+
+// Tab indent in code editor
+document.getElementById('code-input').addEventListener('keydown', e => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = e.target.selectionStart, end = e.target.selectionEnd;
+    e.target.value = e.target.value.substring(0, s) + '  ' + e.target.value.substring(end);
+    e.target.selectionStart = e.target.selectionEnd = s + 2;
+  }
+});
+
+// ╔══════════════════════════════════════════════════════╗
+//   CS REFERENCE TABS
+// ╚══════════════════════════════════════════════════════╝
+function csTab(id) {
+  document.querySelectorAll('.csref-body').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.csref-tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('csref-' + id).classList.add('on');
+  event.target.classList.add('on');
+}
+
+
+function loadSettings(){
+  document.getElementById('s-name').value=settings.name||'';
+  document.getElementById('s-major').value=settings.major||'';
+  document.getElementById('s-year').value=settings.year||'';
+  document.getElementById('s-subjects').value=settings.subjects||'';
+}
+function ss(k,v){settings[k]=v;localStorage.setItem('aru_settings',JSON.stringify(settings));}
+
+// ╔══════════════════════════════════════════════════════╗
+//   INIT
+// ╚══════════════════════════════════════════════════════╝
+updateBadge();
+renderHome();
+// ╔══════════════════════════════════════════════════════╗
+//   PWA 자동 업데이트 시스템
+// ╚══════════════════════════════════════════════════════╝
+const APP_VERSION = '2.0';
+let pendingSW = null;
+
+function initServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    // 1) 이미 대기 중인 새 SW가 있으면 바로 알림
+    if (reg.waiting) {
+      onNewSWReady(reg.waiting);
+      return;
+    }
+
+    // 2) 설치 중인 SW가 완료되면 알림
+    if (reg.installing) {
+      trackInstalling(reg.installing);
+      return;
+    }
+
+    // 3) 새 SW가 발견되면 추적
+    reg.addEventListener('updatefound', () => {
+      trackInstalling(reg.installing);
+    });
+  }).catch(err => console.log('[아루] SW 등록 실패:', err));
+
+  // 4) SW가 교체되면 페이지 자동 새로고침 (사용자가 승인한 경우)
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (window._aruAutoReload) window.location.reload();
+  });
+}
+
+function trackInstalling(sw) {
+  sw.addEventListener('statechange', () => {
+    if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+      onNewSWReady(sw);
+    }
+  });
+}
+
+function onNewSWReady(sw) {
+  pendingSW = sw;
+  // version.json 에서 업데이트 노트 가져오기
+  fetch('./version.json?t=' + Date.now())
+    .then(r => r.json())
+    .then(v => {
+      if (v.version !== APP_VERSION) {
+        document.getElementById('upd-notes').textContent = `v${v.version} — ${v.notes}`;
+        document.getElementById('update-banner').classList.add('show');
+        // 사이드바 상태도 표시
+        showUpdateDot();
+      }
+    }).catch(() => {
+      document.getElementById('update-banner').classList.add('show');
+    });
+}
+
+function applyUpdate() {
+  if (!pendingSW) { window.location.reload(); return; }
+  window._aruAutoReload = true;
+  pendingSW.postMessage('SKIP_WAITING');
+  // SW controllerchange 이벤트로 자동 reload 됨
+  // 혹시 안되면 3초 후 강제
+  setTimeout(() => window.location.reload(), 3000);
+}
+
+function dismissUpdate() {
+  document.getElementById('update-banner').classList.remove('show');
+}
+
+function showUpdateDot() {
+  const dot = document.createElement('span');
+  dot.style.cssText = 'width:7px;height:7px;border-radius:50%;background:#4a9eff;margin-left:auto;flex-shrink:0;animation:pulse 2s infinite;';
+  const settingsNav = document.getElementById('nav-settings');
+  if (settingsNav && !settingsNav.querySelector('.update-dot')) {
+    dot.className = 'update-dot';
+    settingsNav.appendChild(dot);
+  }
+}
+
+// 주기적으로 업데이트 체크 (30분마다)
+function scheduleUpdateCheck() {
+  setInterval(() => {
+    navigator.serviceWorker?.getRegistration('./sw.js').then(reg => {
+      if (reg) reg.update();
+    });
+  }, 30 * 60 * 1000);
+}
+
+initServiceWorker();
+scheduleUpdateCheck();
+</script>
+</body>
+</html>
