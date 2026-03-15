@@ -309,6 +309,11 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;col
 .slbl{font-size:13px;}
 .ssub{font-size:10.5px;color:var(--text3);margin-top:2px;}
 .ibanner{background:var(--abg);border:1px solid var(--aborder);border-radius:var(--rlg);padding:16px 18px;display:flex;gap:12px;align-items:center;margin-bottom:18px;}
+/* UNDO BUTTON */
+#undo-btn{display:none;position:fixed;bottom:60px;right:18px;z-index:500;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rlg);padding:8px 14px;font-size:12px;color:var(--text2);cursor:pointer;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:all .2s;font-family:inherit;}
+#undo-btn:hover{background:var(--bg4);color:var(--text);border-color:var(--border3);}
+#undo-btn .undo-icon{font-size:15px;}
+#undo-btn .undo-lbl{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -1018,6 +1023,14 @@ lower_bound(v.begin(),v.end(),x);</pre></div>
   </div>
 </div>
 
+<button id="undo-btn" onclick="undo()" title="되돌리기 (Ctrl+Z)">
+  <span class="undo-icon">↩</span>
+  <div>
+    <div style="font-size:10px;color:var(--text3);line-height:1">되돌리기</div>
+    <div class="undo-lbl"></div>
+  </div>
+</button>
+
 <div id="toast"></div>
 
 <script>
@@ -1031,7 +1044,72 @@ let ddays=JSON.parse(localStorage.getItem('aru_ddays')||'[]');
 let notes=JSON.parse(localStorage.getItem('aru_notes')||'[]');
 let vault=JSON.parse(localStorage.getItem('aru_vault')||'[]');
 let chatHist=[],chatFiles=[],curMode='explain',curNoteId=null,selClubId=null,parsedArr=[],ttParsed=[],selColor='#7c6dfa',editClassId=null,editTaskId=null;
-const S=k=>S_(k);
+
+// ══ UNDO SYSTEM ══
+const UNDO_MAX=30;
+let undoStack=[];
+let undoLabel='';
+
+function snapshot(label){
+  // 현재 상태 스냅샷 저장
+  const snap={label,state:{
+    tasks:JSON.parse(JSON.stringify(tasks)),
+    classes:JSON.parse(JSON.stringify(classes)),
+    clubs:JSON.parse(JSON.stringify(clubs)),
+    ddays:JSON.parse(JSON.stringify(ddays)),
+    notes:JSON.parse(JSON.stringify(notes)),
+  }};
+  undoStack.push(snap);
+  if(undoStack.length>UNDO_MAX)undoStack.shift();
+  updateUndoBtn();
+}
+
+function undo(){
+  if(!undoStack.length){toast('되돌릴 내용이 없어요','err');return;}
+  const snap=undoStack.pop();
+  // 상태 복원
+  tasks=snap.state.tasks;
+  classes=snap.state.classes;
+  clubs=snap.state.clubs;
+  ddays=snap.state.ddays;
+  notes=snap.state.notes;
+  // 저장
+  ['tasks','classes','clubs','ddays','notes'].forEach(k=>S_(k));
+  // 현재 페이지 리렌더
+  const cur=document.querySelector('.page.on')?.id?.replace('p-','');
+  const h={home:renderHome,tt:renderTT,tasks:renderTasks,clubs:renderClubs,dday:renderDdays,notes:renderNotes};
+  if(cur&&h[cur])h[cur]();
+  updateBadge();
+  updateUndoBtn();
+  toast(`↩ "${snap.label}" 되돌렸어요`);
+}
+
+function updateUndoBtn(){
+  const btn=document.getElementById('undo-btn');
+  if(!btn)return;
+  if(undoStack.length){
+    btn.style.display='flex';
+    const last=undoStack[undoStack.length-1];
+    btn.title=`"${last.label}" 되돌리기`;
+    btn.querySelector('.undo-lbl').textContent=last.label.length>12?last.label.slice(0,12)+'...':last.label;
+  }else{
+    btn.style.display='none';
+  }
+}
+
+// S() 호출 전에 자동 스냅샷 — label은 S() 직전에 setUndoLabel()로 설정
+function setSnap(label){undoLabel=label;}
+const S=k=>{S_(k);updateUndoBtn();};
+// 스냅샷 포함 저장
+function Ss(k,label){snapshot(label||'변경');S_(k);updateUndoBtn();}
+
+// Ctrl+Z 단축키
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.target.matches('input,textarea,select')){
+    e.preventDefault();undo();
+  }
+});
+
 const DAYS=['월','화','수','목','금','토'];
 const HOURS=Array.from({length:13},(_,i)=>i+8);
 const CCOLORS=['#7c6dfa','#3ecf8e','#4a9eff','#f59e0b','#f04747','#ff6b9d','#2dd4bf','#a78bfa','#fb923c'];
@@ -1203,6 +1281,7 @@ function saveClass(){
   if(!name){toast('과목명을 입력해주세요','err');return;}
   const days=getSelDays();
   if(!days.length){toast('요일을 선택해주세요','err');return;}
+  snapshot(`수업 추가: ${name}`);
   const base={name,start:document.getElementById('cl-st').value,end:document.getElementById('cl-en').value,room:document.getElementById('cl-room').value,prof:document.getElementById('cl-prof').value,category:document.getElementById('cl-category').value,color:selColor};
   days.forEach(d=>classes.push({id:uid(),...base,day:d}));
   S('classes');closeM('m-class');renderTT();toast(`${days.length}개 요일에 수업 추가됨 ✅`);
@@ -1214,6 +1293,7 @@ function updateClass(){
   const days=getSelDays();
   if(!days.length){toast('요일을 선택해주세요','err');return;}
   const i=classes.findIndex(c=>String(c.id)===String(editClassId));if(i<0)return;
+  snapshot(`수업 수정: ${classes[i].name}`);
   const oldClass=classes[i];
   // 기존 같은 이름+시간 수업 찾아서 선택된 요일로 교체
   const sameName=classes.filter(c=>c.name===oldClass.name&&c.start===oldClass.start&&c.end===oldClass.end);
@@ -1227,6 +1307,7 @@ function updateClass(){
 function delClass(id){
   const c=classes.find(x=>String(x.id)===String(id));if(!c)return;
   // 같은 수업 전체 삭제 or 이것만 삭제 선택
+  snapshot(`수업 삭제: ${c.name}`);
   const same=classes.filter(x=>x.name===c.name&&x.start===c.start&&x.end===c.end);
   if(same.length>1){
     const all=confirm(`"${c.name}" 수업이 ${same.length}개 요일에 있어요.\n\n[확인] 모든 요일 삭제\n[취소] 이 요일(${DAYS[c.day]})만 삭제`);
@@ -1236,7 +1317,7 @@ function delClass(id){
     if(!confirm('수업을 삭제할까요?'))return;
     classes=classes.filter(x=>String(x.id)!==String(id));
   }
-  S('classes');renderTT();toast('수업 삭제됨');
+  S('classes');renderTT();toast('수업 삭제됨 (Ctrl+Z로 복구)');updateUndoBtn();
 }
 
 function importMyTT(){
@@ -1291,6 +1372,7 @@ function regTT(){
       classes.push({id:uid(),name:c.name,day:c.day,start:c.start,end:c.end,room:c.room||'',prof:c.prof||'',color:c.color||selColor});cnt++;
     }
   });
+  snapshot('시간표 일괄 등록');
   S('classes');closeM('m-tt-parsed');renderTT();toast(`${cnt}개 수업 등록됨 ✅`);
 }
 
@@ -1323,6 +1405,7 @@ function editTask(id){
 function saveTask(){
   const title=document.getElementById('t-title').value.trim();
   if(!title){toast('과제명을 입력하세요','err');return;}
+  snapshot(`과제 추가: ${title}`);
   tasks.push({id:uid(),title,subject:document.getElementById('t-sub').value,type:document.getElementById('t-type').value,due:document.getElementById('t-due').value,note:document.getElementById('t-note').value,done:false,created:new Date().toISOString()});
   S('tasks');closeM('m-task');renderTasks();updateBadge();toast('과제 추가됨 ✅');
 }
@@ -1331,12 +1414,13 @@ function updateTask(){
   const title=document.getElementById('t-title').value.trim();
   if(!title){toast('과제명을 입력하세요','err');return;}
   const i=tasks.findIndex(x=>x.id==editTaskId);if(i<0)return;
+  snapshot(`과제 수정: ${tasks[i].title}`);
   tasks[i]={...tasks[i],title,subject:document.getElementById('t-sub').value,type:document.getElementById('t-type').value,due:document.getElementById('t-due').value,note:document.getElementById('t-note').value};
   S('tasks');closeM('m-task');renderTasks();updateBadge();toast('수정됨 ✅');
 }
 
-function toggleTask(id){const t=tasks.find(x=>x.id==id);if(t){t.done=!t.done;S('tasks');renderTasks();updateBadge();}}
-function delTask(id){if(!confirm('삭제할까요?')){return;}tasks=tasks.filter(t=>t.id!=id);S('tasks');renderTasks();updateBadge();}
+function toggleTask(id){const t=tasks.find(x=>x.id==id);if(t){snapshot(t.done?`완료 취소: ${t.title}`:`완료: ${t.title}`);t.done=!t.done;S('tasks');renderTasks();updateBadge();}}
+function delTask(id){if(!confirm('삭제할까요?')){return;}const t=tasks.find(x=>x.id==id);snapshot(`과제 삭제: ${t?.title||''}`);tasks=tasks.filter(t=>t.id!=id);S('tasks');renderTasks();updateBadge();toast('삭제됨 (Ctrl+Z로 복구)');}
 function sortByDue(){tasks.sort((a,b)=>{if(!a.due)return 1;if(!b.due)return-1;return new Date(a.due)-new Date(b.due);});S('tasks');renderTasks();}
 
 function renderTasks(){
@@ -1382,6 +1466,7 @@ function showAddClub(){
 
 function saveClub(){
   const name=document.getElementById('cb-name').value.trim();if(!name){toast('이름을 입력하세요','err');return;}
+  snapshot(`활동 추가: ${name}`);
   clubs.push({id:uid(),name,type:document.getElementById('cb-type').value,emoji:document.getElementById('cb-emoji').value||getClubEmoji(document.getElementById('cb-type').value),role:document.getElementById('cb-role').value,members:document.getElementById('cb-members').value,place:document.getElementById('cb-place').value,note:document.getElementById('cb-note').value,events:[]});
   S('clubs');closeM('m-club');renderClubs();toast('추가됨 ✅');
 }
@@ -1461,7 +1546,7 @@ function addToTT(clubId){
   toast(`"${c.name}" 이름이 입력됐어요. 요일과 시간을 선택하세요!`);
 }
 
-function delClub(id){if(!confirm('삭제할까요?'))return;clubs=clubs.filter(c=>c.id!=id);if(selClubId==id)selClubId=null;S('clubs');renderClubs();}
+function delClub(id){if(!confirm('삭제할까요?'))return;const c=clubs.find(x=>x.id==id);snapshot(`활동 삭제: ${c?.name||''}`);clubs=clubs.filter(c=>c.id!=id);if(selClubId==id)selClubId=null;S('clubs');renderClubs();toast('삭제됨 (Ctrl+Z로 복구)');}
 
 function showAddCE(){
   if(!selClubId){toast('동아리를 먼저 선택하세요','err');return;}
@@ -1474,6 +1559,7 @@ function showAddCE(){
 function saveCE(){
   const c=clubs.find(x=>x.id==selClubId);if(!c)return;
   const name=document.getElementById('ce-name').value.trim();if(!name){toast('일정명을 입력하세요','err');return;}
+  snapshot(`일정 추가: ${name}`);
   c.events.push({id:uid(),name,type:document.getElementById('ce-type').value,date:document.getElementById('ce-date').value,place:document.getElementById('ce-place').value,note:document.getElementById('ce-note').value});
   S('clubs');closeM('m-ce');renderCE(c);toast('일정 추가됨 ✅');
 }
@@ -1513,13 +1599,14 @@ function addCEToTask(cid,eid){
   S('tasks');updateBadge();toast(`"${e.name}" 과제 스케줄에 등록됨 ✅`);
 }
 
-function delCE(cid,eid){const c=clubs.find(x=>x.id==cid);if(!c)return;c.events=c.events.filter(e=>e.id!=eid);S('clubs');renderCE(c);}
+function delCE(cid,eid){const c=clubs.find(x=>x.id==cid);if(!c)return;const e=c.events.find(x=>x.id==eid);snapshot(`일정 삭제: ${e?.name||''}`);c.events=c.events.filter(e=>e.id!=eid);S('clubs');renderCE(c);toast('삭제됨 (Ctrl+Z로 복구)');}
 
 // ══ DDAY ══
 function showAddDday(){openM('m-dday');['dd-name','dd-emoji','dd-date'].forEach(id=>document.getElementById(id).value='');}
 function saveDday(){
   const name=document.getElementById('dd-name').value.trim();const date=document.getElementById('dd-date').value;
   if(!name||!date){toast('이름과 날짜를 입력하세요','err');return;}
+  snapshot(`D-day 추가: ${name}`);
   ddays.push({id:uid(),name,date,emoji:document.getElementById('dd-emoji').value||'📌'});
   S('ddays');closeM('m-dday');renderDdays();toast('D-day 추가됨 ✅');
 }
@@ -1564,10 +1651,10 @@ function openNote(id){
 function saveNote(){
   const n=notes.find(x=>x.id==curNoteId);if(!n)return;
   n.title=document.getElementById('nt-title').value||'제목 없음';n.body=document.getElementById('nt-body').value;n.subject=document.getElementById('nt-sub').value;n.updated=new Date().toISOString();
-  S('notes');renderNotes();toast('저장됨 ✅');
+  S('notes');renderNotes();toast('저장됨 ✅');updateUndoBtn();
 }
 function delNote(){
-  if(!confirm('이 노트를 삭제할까요?'))return;notes=notes.filter(x=>x.id!=curNoteId);curNoteId=null;S('notes');
+  if(!confirm('이 노트를 삭제할까요?'))return;const n_=notes.find(x=>x.id==curNoteId);snapshot(`노트 삭제: ${n_?.title||''}`);notes=notes.filter(x=>x.id!=curNoteId);curNoteId=null;S('notes');
   document.getElementById('ne-view').style.display='none';document.getElementById('ne-ph').style.display='';renderNotes();
 }
 document.getElementById('nt-body').addEventListener('blur',()=>{if(curNoteId)saveNote();});
@@ -1735,6 +1822,7 @@ async function runParse(){
 }
 function regParsed(){
   let cnt=0;parsedArr.forEach((t,i)=>{if(document.getElementById('pi-'+i)?.checked){tasks.push({id:uid(),title:t.title,subject:t.subject||'',type:t.type||'hw',due:t.due||'',note:t.note||'',done:false,created:new Date().toISOString()});cnt++;}});
+  snapshot('공지 파싱 등록');
   S('tasks');updateBadge();toast(`${cnt}개 과제 등록됨 ✅`);
   document.getElementById('parse-result').style.display='none';document.getElementById('parse-in').value='';parsedArr=[];
 }
