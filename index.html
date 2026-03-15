@@ -489,6 +489,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;col
     <div class="topbar-right">
       <button class="btn" onclick="document.getElementById('tt-img-input').click()" style="color:var(--accent2);border-color:var(--accent-border);">📷 사진으로 등록</button>
       <input type="file" id="tt-img-input" accept="image/*" style="display:none" onchange="parseTTImage(event)">
+      <button class="btn" onclick="importMyTimetable()" style="color:var(--green);border-color:var(--green-border);">✅ 내 시간표 바로 등록</button>
       <button class="btn" onclick="clearTT()">초기화</button>
       <button class="btn primary" onclick="showAddClass()">+ 수업 추가</button>
     </div>
@@ -1405,9 +1406,9 @@ function renderTT(){
   });
   classes.forEach(c=>{
     const startH=parseInt(c.start);
-    const startM=parseInt(c.start.split(':')[1]);
+    const startM=parseInt(c.start.split(':')[1]||0);
     const endH=parseInt(c.end);
-    const endM=parseInt(c.end.split(':')[1]);
+    const endM=parseInt(c.end.split(':')[1]||0);
     const rowIdx=HOURS.indexOf(startH);
     if(rowIdx<0)return;
     const cell=tbody.rows[rowIdx]?.cells[c.day+1];
@@ -1415,12 +1416,19 @@ function renderTT(){
     const span=document.createElement('div');
     const pct=((endH*60+endM)-(startH*60+startM))/60;
     span.className='tt-class';
-    span.style.cssText=`background:${c.color||'var(--accent)'};color:#fff;min-height:${Math.max(38,pct*42)}px;`;
-    span.innerHTML=`<div class="tt-class-name">${c.name}</div><div class="tt-class-room">${c.room||''}</div><div class="tt-class-prof">${c.prof||''}</div>`;
-    span.onclick=()=>{if(confirm(`"${c.name}" 수업을 삭제할까요?`)){classes=classes.filter(x=>x.id!==c.id);S('classes');renderTT();}};
+    span.style.cssText=`background:${c.color||'var(--accent)'};color:#fff;min-height:${Math.max(38,pct*42)}px;position:relative;`;
+    span.innerHTML=`
+      <div class="tt-class-name">${c.name}</div>
+      <div class="tt-class-room">${c.room||''}</div>
+      <div class="tt-class-prof">${c.prof||''}</div>
+      <div style="position:absolute;top:3px;right:4px;display:flex;gap:3px;opacity:0;transition:opacity .15s;" class="tt-actions">
+        <span onclick="event.stopPropagation();editClass('${c.id}')" style="cursor:pointer;font-size:11px;background:rgba(255,255,255,.25);border-radius:3px;padding:1px 4px;">✏️</span>
+        <span onclick="event.stopPropagation();deleteClass('${c.id}')" style="cursor:pointer;font-size:11px;background:rgba(255,255,255,.25);border-radius:3px;padding:1px 4px;">✕</span>
+      </div>`;
+    span.addEventListener('mouseenter',()=>span.querySelector('.tt-actions').style.opacity='1');
+    span.addEventListener('mouseleave',()=>span.querySelector('.tt-actions').style.opacity='0');
     cell.appendChild(span);
   });
-  // add buttons in empty cells
   tbody.querySelectorAll('td.tt-cell').forEach(cell=>{
     if(!cell.querySelector('.tt-class')){
       const btn=document.createElement('button');
@@ -1429,6 +1437,43 @@ function renderTT(){
       cell.appendChild(btn);
     }
   });
+}
+
+function deleteClass(id){
+  if(!confirm('이 수업을 삭제할까요?'))return;
+  classes=classes.filter(c=>String(c.id)!==String(id));
+  S('classes');renderTT();toast('수업 삭제됨');
+}
+
+function editClass(id){
+  const c=classes.find(x=>String(x.id)===String(id));
+  if(!c)return;
+  document.getElementById('cl-name').value=c.name;
+  document.getElementById('cl-day').value=c.day;
+  document.getElementById('cl-start').value=c.start;
+  document.getElementById('cl-end').value=c.end;
+  document.getElementById('cl-room').value=c.room||'';
+  document.getElementById('cl-prof').value=c.prof||'';
+  selectedColor=c.color||CLASS_COLORS[0];
+  const cp=document.getElementById('color-picker');
+  cp.innerHTML=CLASS_COLORS.map(col=>`<div onclick="selectedColor='${col}';document.querySelectorAll('.cp-dot').forEach(d=>d.style.outline='none');this.style.outline='2px solid white';" class="cp-dot" style="width:20px;height:20px;border-radius:50%;background:${col};cursor:pointer;outline:${col===selectedColor?'2px solid white':'none'};"></div>`).join('');
+  // 저장 버튼을 수정 모드로
+  const modal=document.getElementById('m-addclass');
+  modal.querySelector('h2').textContent='수업 수정';
+  modal.querySelector('.btn.primary').onclick=()=>updateClass(id);
+  openModal('m-addclass');
+}
+
+function updateClass(id){
+  const name=document.getElementById('cl-name').value.trim();
+  if(!name){toast('과목명을 입력해주세요','err');return;}
+  const idx=classes.findIndex(c=>String(c.id)===String(id));
+  if(idx<0)return;
+  classes[idx]={...classes[idx],name,day:+document.getElementById('cl-day').value,start:document.getElementById('cl-start').value,end:document.getElementById('cl-end').value,room:document.getElementById('cl-room').value,prof:document.getElementById('cl-prof').value,color:selectedColor};
+  S('classes');closeModal('m-addclass');renderTT();toast('수업 수정됨 ✅');
+  // 버튼 원래대로
+  document.getElementById('m-addclass').querySelector('h2').textContent='수업 추가';
+  document.getElementById('m-addclass').querySelector('.btn.primary').onclick=saveClass;
 }
 
 function showAddClass(day=0,hour=9){
@@ -1459,7 +1504,28 @@ function clearTT(){if(confirm('시간표를 모두 삭제할까요?')){classes=[
 const TYPE_LBL={hw:'과제',exam:'시험',report:'리포트',proj:'프로젝트',etc:'기타'};
 const TYPE_CLS={hw:'tag-blue',exam:'tag-red',report:'tag-amber',proj:'tag-green',etc:'tag-purple'};
 
-function openAddTask(){openModal('m-addtask');document.getElementById('t-title').value='';document.getElementById('t-subject').value='';document.getElementById('t-due').value='';document.getElementById('t-note').value='';}
+function openAddTask(){openModal('m-addtask');document.getElementById('t-title').value='';document.getElementById('t-subject').value='';document.getElementById('t-due').value='';document.getElementById('t-note').value='';document.getElementById('m-addtask').querySelector('h2').textContent='과제 / 일정 추가';document.getElementById('m-addtask').querySelector('.btn.primary').onclick=saveTask;}
+
+function editTask(id){
+  const t=tasks.find(x=>x.id==id);if(!t)return;
+  document.getElementById('t-title').value=t.title;
+  document.getElementById('t-subject').value=t.subject||'';
+  document.getElementById('t-type').value=t.type||'hw';
+  document.getElementById('t-due').value=t.due||'';
+  document.getElementById('t-note').value=t.note||'';
+  document.getElementById('m-addtask').querySelector('h2').textContent='과제 수정';
+  document.getElementById('m-addtask').querySelector('.btn.primary').onclick=()=>{
+    const title=document.getElementById('t-title').value.trim();
+    if(!title){toast('과제명을 입력하세요','err');return;}
+    const idx=tasks.findIndex(x=>x.id==id);
+    if(idx<0)return;
+    tasks[idx]={...tasks[idx],title,subject:document.getElementById('t-subject').value,type:document.getElementById('t-type').value,due:document.getElementById('t-due').value,note:document.getElementById('t-note').value};
+    S('tasks');closeModal('m-addtask');renderTasks();updateBadge();toast('수정됨 ✅');
+    document.getElementById('m-addtask').querySelector('h2').textContent='과제 / 일정 추가';
+    document.getElementById('m-addtask').querySelector('.btn.primary').onclick=saveTask;
+  };
+  openModal('m-addtask');
+}
 
 function saveTask(){
   const title=document.getElementById('t-title').value.trim();
@@ -1495,6 +1561,7 @@ function renderTasks(){
         </div>
         ${t.note?`<div style="font-size:11px;color:var(--text3);margin-top:3px;">${t.note}</div>`:''}
       </div>
+        <div class="task-del" onclick="editTask(${t.id})" style="color:var(--text3);margin-right:2px;" title="수정">✏️</div>
       <div class="task-del" onclick="deleteTask(${t.id})">✕</div>
     </div>`;
   }).join('');
@@ -1918,19 +1985,38 @@ function registerParsed(){
   parsedItems=[];
 }
 
-// ╔══════════════════════════════════════════════════════╗
-//   시간표 사진 자동 파싱
-// ╚══════════════════════════════════════════════════════╝
+// 사진에서 읽은 시간표 직접 등록
+function importMyTimetable(){
+  const data=[
+    {name:'공학미적분학',day:0,start:'09:00',end:'10:30',room:'102-407',color:'#f04747'},
+    {name:'공학미적분학',day:2,start:'09:00',end:'10:30',room:'102-407',color:'#f04747'},
+    {name:'이산수학(I)',day:1,start:'09:00',end:'11:00',room:'102-307',color:'#4a9eff'},
+    {name:'이산수학(I)',day:3,start:'09:00',end:'11:00',room:'102-307',color:'#4a9eff'},
+    {name:'대학영어',day:4,start:'09:00',end:'10:30',room:'210-301',color:'#a78bfa'},
+    {name:'컴퓨터및프로그래밍입문',day:1,start:'10:30',end:'12:30',room:'102-310',color:'#f59e0b'},
+    {name:'컴퓨터및프로그래밍입문',day:3,start:'10:30',end:'12:30',room:'102-310',color:'#f59e0b'},
+    {name:'언어교육원',day:0,start:'11:00',end:'12:00',room:'210-407',color:'#eab308'},
+    {name:'언어교육원',day:2,start:'11:00',end:'12:00',room:'210-407',color:'#eab308'},
+    {name:'언어교육원(비)',day:1,start:'13:00',end:'14:30',room:'도서관',color:'#8b5cf6'},
+    {name:'언어교육원(비)',day:3,start:'13:00',end:'14:30',room:'도서관',color:'#8b5cf6'},
+    {name:'일반물리학(I)',day:0,start:'13:00',end:'15:00',room:'102-405',color:'#3ecf8e'},
+    {name:'일반물리학(I)',day:2,start:'13:00',end:'15:00',room:'102-405',color:'#3ecf8e'},
+    {name:'인공지능과디지털사고',day:0,start:'15:00',end:'17:00',room:'206-11305',color:'#2dd4bf'},
+    {name:'인터넷과웹기초',day:1,start:'15:00',end:'16:30',room:'102-306',color:'#22c55e'},
+    {name:'인터넷과웹기초',day:3,start:'15:00',end:'16:30',room:'102-306',color:'#22c55e'},
+  ];
+  showTTParsedModal(data);
+}
+
+
 async function parseTTImage(e) {
   const file = e.target.files[0];
   if (!file) return;
   if (file.size > 10*1024*1024) { toast('10MB 이하 이미지만 가능해요', 'err'); return; }
-
-  toast('아루가 시간표 읽는 중... 잠깐만요 ⏳');
-
+  if (!settings.apikey) { toast('⚙️ 설정에서 API 키를 먼저 입력해주세요!', 'err'); go('settings'); e.target.value=''; return; }
+  toast('아루가 시간표 읽는 중... ⏳');
   const base64 = await f2b64(file);
   const mediaType = file.type || 'image/png';
-
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -1942,26 +2028,20 @@ async function parseTTImage(e) {
 [{"name":"과목명","day":0,"start":"09:00","end":"10:30","room":"강의실","prof":"교수명","color":"#7c6dfa"}]
 day는 0=월,1=화,2=수,3=목,4=금. start/end는 24시간 HH:MM 형식. room과 prof는 없으면 빈 문자열.
 color는 과목마다 다르게: #7c6dfa,#3ecf8e,#4a9eff,#f59e0b,#f04747,#ff6b9d,#2dd4bf 중에서 순서대로 배정.`,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-            { type: 'text', text: '이 시간표 이미지에서 모든 수업을 추출해줘.' }
-          ]
-        }]
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: '이 시간표 이미지에서 모든 수업을 추출해줘.' }
+        ]}]
       })
     });
     const data = await resp.json();
+    if (data.error) { toast('API 오류: ' + (data.error.message||'키를 확인해주세요'), 'err'); return; }
     const raw = data.content?.map(b => b.text || '').join('') || '[]';
     const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
-
     if (!parsed.length) { toast('시간표를 읽지 못했어요. 더 선명한 사진으로 시도해보세요', 'err'); return; }
-
-    // 확인 모달 띄우기
     showTTParsedModal(parsed);
-
   } catch(err) {
-    toast('시간표 인식 실패. 다시 시도해주세요', 'err');
+    toast('인식 실패: ' + (err.message||'다시 시도해주세요'), 'err');
   }
   e.target.value = '';
 }
