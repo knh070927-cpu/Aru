@@ -487,6 +487,8 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;col
   <div class="topbar">
     <div class="topbar-left"><h1>🗓️ 시간표</h1><p>수업 일정을 등록하고 관리하세요</p></div>
     <div class="topbar-right">
+      <button class="btn" onclick="document.getElementById('tt-img-input').click()" style="color:var(--accent2);border-color:var(--accent-border);">📷 사진으로 등록</button>
+      <input type="file" id="tt-img-input" accept="image/*" style="display:none" onchange="parseTTImage(event)">
       <button class="btn" onclick="clearTT()">초기화</button>
       <button class="btn primary" onclick="showAddClass()">+ 수업 추가</button>
     </div>
@@ -1907,8 +1909,95 @@ function registerParsed(){
 }
 
 // ╔══════════════════════════════════════════════════════╗
-//   CODE HELPER
+//   시간표 사진 자동 파싱
 // ╚══════════════════════════════════════════════════════╝
+async function parseTTImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 10*1024*1024) { toast('10MB 이하 이미지만 가능해요', 'err'); return; }
+
+  toast('아루가 시간표 읽는 중... 잠깐만요 ⏳');
+
+  const base64 = await f2b64(file);
+  const mediaType = file.type || 'image/png';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `시간표 이미지를 분석해서 수업 정보를 추출하세요. 반드시 JSON 배열만 반환하세요 (다른 텍스트, 설명, 마크다운 없음):
+[{"name":"과목명","day":0,"start":"09:00","end":"10:30","room":"강의실","prof":"교수명","color":"#7c6dfa"}]
+day는 0=월,1=화,2=수,3=목,4=금. start/end는 24시간 HH:MM 형식. room과 prof는 없으면 빈 문자열.
+color는 과목마다 다르게: #7c6dfa,#3ecf8e,#4a9eff,#f59e0b,#f04747,#ff6b9d,#2dd4bf 중에서 순서대로 배정.`,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+            { type: 'text', text: '이 시간표 이미지에서 모든 수업을 추출해줘.' }
+          ]
+        }]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.map(b => b.text || '').join('') || '[]';
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+
+    if (!parsed.length) { toast('시간표를 읽지 못했어요. 더 선명한 사진으로 시도해보세요', 'err'); return; }
+
+    // 확인 모달 띄우기
+    showTTParsedModal(parsed);
+
+  } catch(err) {
+    toast('시간표 인식 실패. 다시 시도해주세요', 'err');
+  }
+  e.target.value = '';
+}
+
+function showTTParsedModal(parsed) {
+  const DAYS = ['월','화','수','목','금'];
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay on';
+  overlay.id = 'tt-parsed-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="width:520px;">
+      <h2>📷 인식된 시간표 <span class="modal-close" onclick="document.getElementById('tt-parsed-overlay').remove()">✕</span></h2>
+      <div style="font-size:12.5px;color:var(--text2);margin-bottom:12px;">아루가 읽은 수업 목록이에요. 확인 후 등록해주세요.</div>
+      <div id="tt-parsed-list" style="display:flex;flex-direction:column;gap:7px;max-height:340px;overflow-y:auto;margin-bottom:14px;">
+        ${parsed.map((c,i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--r-sm);border-left:3px solid ${c.color||'#7c6dfa'};">
+            <input type="checkbox" id="ttpc-${i}" checked style="accent-color:var(--accent);flex-shrink:0;">
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;color:var(--text);">${c.name}</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px;">${DAYS[c.day]}요일 ${c.start}~${c.end}${c.room?' · '+c.room:''}${c.prof?' · '+c.prof:''}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn primary" style="flex:1;" onclick="registerTTParsed(${JSON.stringify(parsed).replace(/"/g,'&quot;')})">선택 항목 시간표에 등록</button>
+        <button class="btn" onclick="document.getElementById('tt-parsed-overlay').remove()">취소</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function registerTTParsed(parsed) {
+  let cnt = 0;
+  parsed.forEach((c, i) => {
+    if (document.getElementById('ttpc-'+i)?.checked) {
+      classes.push({ id: uid(), name: c.name, day: c.day, start: c.start, end: c.end, room: c.room||'', prof: c.prof||'', color: c.color||selectedColor });
+      cnt++;
+    }
+  });
+  S('classes');
+  document.getElementById('tt-parsed-overlay')?.remove();
+  renderTT();
+  toast(`${cnt}개 수업이 시간표에 등록됐어요 ✅`);
+}
+
+
 let currentCodeMode = 'explain';
 const CODE_MODES = {
   explain: { lbl:'코드 설명', sys:'당신은 컴퓨터공학 전공 학생을 돕는 AI 코드 분석가 아루입니다. 주어진 코드를 분석해서: 1) 코드의 전체 목적, 2) 각 부분의 동작 원리, 3) 사용된 자료구조/알고리즘, 4) 시간복잡도와 공간복잡도, 5) 주의할 점을 명확히 설명하세요. 한국어로 답변하세요.' },
