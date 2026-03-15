@@ -1168,7 +1168,17 @@ lower_bound(v.begin(), v.end(), target);</pre></div>
       </div>
     </div>
     <div class="settings-section">
-      <div class="settings-section-lbl">내 정보</div>
+      <div class="settings-section-lbl">AI 연결 설정</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-lbl">Anthropic API 키</div>
+          <div class="settings-sub">console.anthropic.com 에서 발급 — 로컬에만 저장돼요</div>
+        </div>
+        <input type="password" class="fi" id="s-apikey" placeholder="sk-ant-..." oninput="ss('apikey',this.value)" style="width:220px;font-family:var(--font-mono);font-size:11px;">
+      </div>
+      <div id="apikey-status" style="font-size:12px;padding:8px 12px;border-radius:var(--r-sm);display:none;margin-top:4px;"></div>
+      <button class="btn primary" onclick="testAPIKey()" style="margin-top:8px;">연결 테스트</button>
+    </div>
       <div class="settings-row"><div><div class="settings-lbl">이름</div></div><input type="text" class="fi" id="s-name" placeholder="홍길동" oninput="ss('name',this.value)" style="width:160px;"></div>
       <div class="settings-row"><div><div class="settings-lbl">학과 / 전공</div><div class="settings-sub">AI가 전공 수준에 맞게 설명해요</div></div><input type="text" class="fi" id="s-major" placeholder="경제학과" oninput="ss('major',this.value)" style="width:160px;"></div>
       <div class="settings-row"><div><div class="settings-lbl">학년</div></div><select class="fi" id="s-year" onchange="ss('year',this.value)" style="width:100px;"><option value="">선택</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option><option value="4">4학년</option></select></div>
@@ -1760,7 +1770,7 @@ async function sendChat(){
   const tid=addTyping();
   document.getElementById('send-btn').disabled=true;
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:getSystemPrompt(),messages:chatHistory})});
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:getAPIHeaders(),body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:getSystemPrompt(),messages:chatHistory})});
     const d=await r.json();
     const reply=d.content?.map(b=>b.text||'').join('')||'오류가 발생했습니다.';
     removeTyping(tid);addMsg('ai',reply);chatHistory.push({role:'assistant',content:reply});
@@ -1869,7 +1879,7 @@ async function runParse(){
   if(!input){toast('내용을 붙여넣어주세요','err');return;}
   const btn=document.getElementById('parse-btn');btn.disabled=true;btn.textContent='분석 중...';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:'대학교 플라토 공지·강의계획서 텍스트에서 과제·시험·퀴즈 등 마감 일정을 추출하세요. 반드시 JSON 배열만 반환하세요 (다른 텍스트 없음): [{"title":"과제명","subject":"과목명","type":"hw|exam|proj|report","due":"YYYY-MM-DDTHH:mm","note":"메모"}]',messages:[{role:'user',content:'파싱:\n\n'+input}]})});
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:getAPIHeaders(),body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:'대학교 플라토 공지·강의계획서 텍스트에서 과제·시험·퀴즈 등 마감 일정을 추출하세요. 반드시 JSON 배열만 반환하세요 (다른 텍스트 없음): [{"title":"과제명","subject":"과목명","type":"hw|exam|proj|report","due":"YYYY-MM-DDTHH:mm","note":"메모"}]',messages:[{role:'user',content:'파싱:\n\n'+input}]})});
     const d=await r.json();
     const raw=d.content?.map(b=>b.text||'').join('')||'[]';
     parsedItems=JSON.parse(raw.replace(/```json|```/g,'').trim());
@@ -1924,7 +1934,7 @@ async function parseTTImage(e) {
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAPIHeaders(),
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -2040,7 +2050,7 @@ async function runCodeAI() {
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: getAPIHeaders(),
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000,
         system: CODE_MODES[currentCodeMode].sys, messages: [{ role: 'user', content: prompt }] })
     });
@@ -2100,11 +2110,30 @@ function csTab(id) {
 }
 
 
+function getAPIHeaders(){
+  const key=settings.apikey||'';
+  return{'Content-Type':'application/json',...(key?{'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}:{})};
+}
+
+async function testAPIKey(){
+  const key=settings.apikey||'';
+  const el=document.getElementById('apikey-status');
+  if(!key){el.style.display='';el.style.background='var(--red-bg)';el.style.color='var(--red)';el.textContent='API 키를 먼저 입력해주세요.';return;}
+  el.style.display='';el.style.background='var(--amber-bg)';el.style.color='var(--amber)';el.textContent='테스트 중...';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:getAPIHeaders(),body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'hi'}]})});
+    const d=await r.json();
+    if(d.content){el.style.background='var(--green-bg)';el.style.color='var(--green)';el.textContent='✅ 연결 성공! 아루 AI 기능을 모두 사용할 수 있어요.';}
+    else{el.style.background='var(--red-bg)';el.style.color='var(--red)';el.textContent='❌ 키가 올바르지 않아요.';}
+  }catch(e){el.style.background='var(--red-bg)';el.style.color='var(--red)';el.textContent='❌ 연결 실패. 키를 확인해주세요.';}
+}
+
 function loadSettings(){
   document.getElementById('s-name').value=settings.name||'';
   document.getElementById('s-major').value=settings.major||'';
   document.getElementById('s-year').value=settings.year||'';
   document.getElementById('s-subjects').value=settings.subjects||'';
+  document.getElementById('s-apikey').value=settings.apikey||'';
 }
 function ss(k,v){settings[k]=v;localStorage.setItem('aru_settings',JSON.stringify(settings));}
 
