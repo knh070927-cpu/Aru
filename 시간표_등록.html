@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>아루 시간표 등록</title>
+<style>
+body{font-family:-apple-system,sans-serif;background:#0d0d1f;color:#e8e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;}
+.box{background:#16162a;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:32px;max-width:480px;width:90%;text-align:center;}
+h2{font-size:20px;margin-bottom:8px;}
+p{font-size:13px;color:#9090b8;margin-bottom:20px;line-height:1.6;}
+.list{text-align:left;margin-bottom:24px;display:flex;flex-direction:column;gap:6px;}
+.item{padding:10px 14px;border-radius:8px;font-size:12.5px;border-left:3px solid;}
+.btn{background:#7c6dfa;color:#fff;border:none;border-radius:10px;padding:13px 28px;font-size:15px;font-weight:600;cursor:pointer;width:100%;}
+.btn:hover{background:#a096ff;}
+.done{background:#3ecf8e;margin-top:12px;}
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>✦ 아루 시간표 자동 등록</h2>
+  <p>아래 수업을 아루 시간표에 등록해요.<br>버튼을 누르면 자동으로 저장돼요.</p>
+  <div class="list" id="list"></div>
+  <button class="btn" onclick="register()">시간표 등록하기</button>
+  <div id="result"></div>
+</div>
+<script>
+const DAYS = ['월','화','수','목','금'];
+const classes = [
+  {name:'공학미적분학',   day:0, start:'09:00', end:'10:30', room:'102-407', color:'#f04747'},
+  {name:'공학미적분학',   day:2, start:'09:00', end:'10:30', room:'102-407', color:'#f04747'},
+  {name:'이산수학(I)',    day:1, start:'09:00', end:'11:00', room:'102-307', color:'#4a9eff'},
+  {name:'이산수학(I)',    day:3, start:'09:00', end:'11:00', room:'102-307', color:'#4a9eff'},
+  {name:'대학영어',       day:4, start:'09:00', end:'10:30', room:'210-301', color:'#a78bfa'},
+  {name:'컴퓨터및프로그래밍입문', day:1, start:'10:30', end:'12:30', room:'102-310', color:'#f59e0b'},
+  {name:'컴퓨터및프로그래밍입문', day:3, start:'10:30', end:'12:30', room:'102-310', color:'#f59e0b'},
+  {name:'언어교육원',     day:0, start:'11:00', end:'12:00', room:'210-407', color:'#eab308'},
+  {name:'언어교육원',     day:2, start:'11:00', end:'12:00', room:'210-407', color:'#eab308'},
+  {name:'언어교육원(비)', day:1, start:'13:00', end:'14:30', room:'도서관', color:'#8b5cf6'},
+  {name:'언어교육원(비)', day:3, start:'13:00', end:'14:30', room:'도서관', color:'#8b5cf6'},
+  {name:'일반물리학(I)',  day:0, start:'13:00', end:'15:00', room:'102-405', color:'#3ecf8e'},
+  {name:'일반물리학(I)',  day:2, start:'13:00', end:'15:00', room:'102-405', color:'#3ecf8e'},
+  {name:'인공지능과디지털사고', day:0, start:'15:00', end:'17:00', room:'206-11305', color:'#2dd4bf'},
+  {name:'인터넷과웹기초', day:1, start:'15:00', end:'16:30', room:'102-306', color:'#22c55e'},
+  {name:'인터넷과웹기초', day:3, start:'15:00', end:'16:30', room:'102-306', color:'#22c55e'},
+];
+
+// 목록 표시
+const list = document.getElementById('list');
+classes.forEach(c => {
+  const div = document.createElement('div');
+  div.className = 'item';
+  div.style.borderColor = c.color;
+  div.style.background = c.color + '18';
+  div.innerHTML = `<strong style="color:${c.color}">${c.name}</strong> &nbsp; ${DAYS[c.day]}요일 ${c.start}~${c.end} &nbsp; <span style="color:#666">${c.room}</span>`;
+  list.appendChild(div);
+});
+
+function register() {
+  // 기존 아루 시간표 데이터 불러오기
+  let existing = [];
+  try { existing = JSON.parse(localStorage.getItem('aru_classes') || '[]'); } catch(e) {}
+
+  // 새 수업 추가 (중복 제거)
+  const newClasses = classes.map(c => ({
+    id: Date.now() + Math.random(),
+    name: c.name, day: c.day, start: c.start, end: c.end,
+    room: c.room, prof: '', color: c.color
+  }));
+
+  // 기존에 같은 과목 없으면 추가
+  const existingNames = existing.map(e => e.name + e.day);
+  const toAdd = newClasses.filter(c => !existingNames.includes(c.name + c.day));
+  const merged = [...existing, ...toAdd];
+
+  localStorage.setItem('aru_classes', JSON.stringify(merged));
+
+  document.getElementById('result').innerHTML = `
+    <div style="margin-top:14px;padding:14px;background:rgba(62,207,142,0.15);border:1px solid rgba(62,207,142,0.3);border-radius:10px;font-size:13px;color:#3ecf8e;">
+      ✅ ${toAdd.length}개 수업 등록 완료!<br>
+      <span style="font-size:11px;opacity:.8">이제 아루 시간표 탭을 열면 반영돼 있어요.</span>
+    </div>`;
+}
+</script>
+</body>
+</html>
