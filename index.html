@@ -402,7 +402,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;col
       <button class="btn red" onclick="if(confirm('시간표를 초기화할까요?')){classes=[];S('classes');renderTT();}">초기화</button>
     </div>
   </div>
-  <div id="tt-wrap"><table class="tt" id="tt-table"><thead><tr><th class="tt-th-time"></th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead><tbody id="tt-body"></tbody></table></div>
+  <div id="tt-wrap"><table class="tt" id="tt-table"><thead><tr><th class="tt-th-time"></th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th style="color:var(--amber)">토</th></tr></thead><tbody id="tt-body"></tbody></table></div>
 </div>
 
 <!-- ===== TASKS ===== -->
@@ -908,16 +908,42 @@ lower_bound(v.begin(),v.end(),x);</pre></div>
 
 <!-- MODALS -->
 <div class="ov" id="m-class">
-  <div class="modal">
-    <div class="mh">수업 추가 <span class="mx" onclick="closeM('m-class')">✕</span></div>
+  <div class="modal" style="width:480px">
+    <div class="mh" id="m-class-title">수업 추가 <span class="mx" onclick="closeM('m-class')">✕</span></div>
     <div class="frow"><input class="fi f1" id="cl-name" placeholder="과목명 (예: 공학미적분학)"></div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px">요일 (여러 개 선택 가능)</div>
+      <div style="display:flex;gap:6px" id="cl-days">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;border-radius:var(--rsm);border:1px solid var(--border);font-size:13px;transition:all .15s" id="dl-0"><input type="checkbox" value="0" style="accent-color:var(--accent)"> 월</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;border-radius:var(--rsm);border:1px solid var(--border);font-size:13px;transition:all .15s" id="dl-1"><input type="checkbox" value="1" style="accent-color:var(--accent)"> 화</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;border-radius:var(--rsm);border:1px solid var(--border);font-size:13px;transition:all .15s" id="dl-2"><input type="checkbox" value="2" style="accent-color:var(--accent)"> 수</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;border-radius:var(--rsm);border:1px solid var(--border);font-size:13px;transition:all .15s" id="dl-3"><input type="checkbox" value="3" style="accent-color:var(--accent)"> 목</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;border-radius:var(--rsm);border:1px solid var(--border);font-size:13px;transition:all .15s" id="dl-4"><input type="checkbox" value="4" style="accent-color:var(--accent)"> 금</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;border-radius:var(--rsm);border:1px solid var(--border);font-size:13px;transition:all .15s" id="dl-5"><input type="checkbox" value="5" style="accent-color:var(--accent)"> 토</label>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
+        <button class="btn" style="font-size:11px;padding:3px 8px" onclick="setDayPreset([0,2,4])">월수금</button>
+        <button class="btn" style="font-size:11px;padding:3px 8px" onclick="setDayPreset([1,3])">화목</button>
+        <button class="btn" style="font-size:11px;padding:3px 8px" onclick="setDayPreset([0,1,2,3,4])">월~금</button>
+        <button class="btn" style="font-size:11px;padding:3px 8px" onclick="setDayPreset([0])">월 1개만</button>
+      </div>
+    </div>
     <div class="frow">
-      <select class="fi" id="cl-day"><option value="0">월</option><option value="1">화</option><option value="2">수</option><option value="3">목</option><option value="4">금</option></select>
       <input type="time" class="fi f1" id="cl-st" value="09:00">
       <span style="align-self:center;color:var(--text3);font-size:12px">~</span>
       <input type="time" class="fi f1" id="cl-en" value="10:30">
     </div>
     <div class="frow"><input class="fi f1" id="cl-room" placeholder="강의실"><input class="fi f1" id="cl-prof" placeholder="교수명"></div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:5px">분류</div>
+      <select class="fi" id="cl-category" style="width:100%">
+        <option value="lecture">📚 강의</option>
+        <option value="study">📖 스터디</option>
+        <option value="club">🎭 동아리</option>
+        <option value="lab">🔬 실험/실습</option>
+        <option value="etc">📌 기타</option>
+      </select>
+    </div>
     <div class="frow"><label style="font-size:12px;color:var(--text2);align-self:center">색상</label><div id="cp" style="display:flex;gap:5px;flex-wrap:wrap"></div></div>
     <div style="display:flex;gap:7px;margin-top:11px"><button class="btn pri" id="cl-save-btn" onclick="saveClass()">추가</button><button class="btn" onclick="closeM('m-class')">취소</button></div>
   </div>
@@ -935,20 +961,41 @@ lower_bound(v.begin(),v.end(),x);</pre></div>
 
 <div class="ov" id="m-club">
   <div class="modal">
-    <div class="mh">동아리 추가 <span class="mx" onclick="closeM('m-club')">✕</span></div>
-    <div class="frow"><input class="fi f1" id="cb-name" placeholder="동아리 이름"></div>
-    <div class="frow"><input class="fi f1" id="cb-emoji" placeholder="이모지 (예: 📚)" maxlength="2"><input class="fi f1" id="cb-role" placeholder="역할 (예: 부원)"></div>
-    <div class="frow"><input class="fi f1" id="cb-note" placeholder="메모"></div>
-    <div style="display:flex;gap:7px;margin-top:11px"><button class="btn pri" onclick="saveClub()">추가</button><button class="btn" onclick="closeM('m-club')">취소</button></div>
+    <div class="mh" id="m-club-title">동아리 / 활동 추가 <span class="mx" onclick="closeM('m-club')">✕</span></div>
+    <div class="frow"><input class="fi f1" id="cb-name" placeholder="이름 (예: 알고리즘 스터디)"></div>
+    <div class="frow">
+      <select class="fi f1" id="cb-type">
+        <option value="club">🎭 동아리</option>
+        <option value="study">📖 스터디</option>
+        <option value="council">🏛 학생회</option>
+        <option value="volunteer">🤝 봉사</option>
+        <option value="sport">⚽ 운동/체육</option>
+        <option value="etc">📌 기타</option>
+      </select>
+      <input class="fi" id="cb-emoji" placeholder="이모지" maxlength="2" style="width:60px;text-align:center">
+    </div>
+    <div class="frow"><input class="fi f1" id="cb-role" placeholder="역할 (예: 부원, 회장)"><input class="fi f1" id="cb-members" placeholder="인원 수 (예: 8명)"></div>
+    <div class="frow"><input class="fi f1" id="cb-place" placeholder="주요 활동 장소"></div>
+    <div class="frow"><textarea class="fi f1" id="cb-note" placeholder="메모" style="height:60px;resize:none"></textarea></div>
+    <div style="display:flex;gap:7px;margin-top:11px"><button class="btn pri" id="cb-save-btn" onclick="saveClub()">추가</button><button class="btn" onclick="closeM('m-club')">취소</button></div>
   </div>
 </div>
 
 <div class="ov" id="m-ce">
   <div class="modal">
-    <div class="mh">동아리 일정 추가 <span class="mx" onclick="closeM('m-ce')">✕</span></div>
-    <div class="frow"><input class="fi f1" id="ce-name" placeholder="일정명 (예: 정기 모임)"></div>
-    <div class="frow"><input type="datetime-local" class="fi f1" id="ce-date"><input class="fi f1" id="ce-place" placeholder="장소"></div>
-    <div class="frow"><input class="fi f1" id="ce-note" placeholder="메모"></div>
+    <div class="mh">일정 추가 <span class="mx" onclick="closeM('m-ce')">✕</span></div>
+    <div class="frow"><input class="fi f1" id="ce-name" placeholder="일정명 (예: 정기 모임, 스터디 3회차)"></div>
+    <div class="frow">
+      <select class="fi" id="ce-type">
+        <option value="meet">👥 정기 모임</option>
+        <option value="study">📖 스터디</option>
+        <option value="event">🎉 행사/이벤트</option>
+        <option value="contest">🏆 대회/공모전</option>
+        <option value="etc">📌 기타</option>
+      </select>
+    </div>
+    <div class="frow"><input type="datetime-local" class="fi f1" id="ce-date"></div>
+    <div class="frow"><input class="fi f1" id="ce-place" placeholder="장소"><input class="fi f1" id="ce-note" placeholder="메모"></div>
     <div style="display:flex;gap:7px;margin-top:11px"><button class="btn pri" onclick="saveCE()">추가</button><button class="btn" onclick="closeM('m-ce')">취소</button></div>
   </div>
 </div>
@@ -985,7 +1032,7 @@ let notes=JSON.parse(localStorage.getItem('aru_notes')||'[]');
 let vault=JSON.parse(localStorage.getItem('aru_vault')||'[]');
 let chatHist=[],chatFiles=[],curMode='explain',curNoteId=null,selClubId=null,parsedArr=[],ttParsed=[],selColor='#7c6dfa',editClassId=null,editTaskId=null;
 const S=k=>S_(k);
-const DAYS=['월','화','수','목','금'];
+const DAYS=['월','화','수','목','금','토'];
 const HOURS=Array.from({length:13},(_,i)=>i+8);
 const CCOLORS=['#7c6dfa','#3ecf8e','#4a9eff','#f59e0b','#f04747','#ff6b9d','#2dd4bf','#a78bfa','#fb923c'];
 const TLBL={hw:'과제',exam:'시험',report:'리포트',proj:'프로젝트',etc:'기타'};
@@ -1080,17 +1127,50 @@ function renderTT(){
   });
 }
 
+function renderTT(){
+  const tb=document.getElementById('tt-body');tb.innerHTML='';
+  HOURS.forEach(h=>{
+    const tr=document.createElement('tr');
+    let cells=`<td class="tt-time-cell">${h}:00</td>`;
+    DAYS.forEach((_,d)=>{const isSat=d===5;cells+=`<td class="tt-day-cell${isSat?' sat':''}" data-d="${d}" data-h="${h}" style="${isSat?'background:rgba(245,158,11,.03)':''};"><button class="tt-add" onclick="showAddClass(${d},${h})">+</button></td>`;});
+    tr.innerHTML=cells;tb.appendChild(tr);
+  });
+  const CICONS={lecture:'',study:'📖',club:'🎭',lab:'🔬',etc:'📌'};
+  classes.forEach(c=>{
+    const sh=parseInt(c.start),sm=parseInt(c.start.split(':')[1]||0);
+    const eh=parseInt(c.end),em=parseInt(c.end.split(':')[1]||0);
+    const ri=HOURS.indexOf(sh);if(ri<0)return;
+    const cell=tb.rows[ri]?.cells[c.day+1];if(!cell)return;
+    const dur=((eh*60+em)-(sh*60+sm));
+    const topPx=sm/60*ROW_H;
+    const hPx=Math.max(32,dur/60*ROW_H)-2;
+    const icon=CICONS[c.category||'lecture']||'';
+    const blk=document.createElement('div');
+    blk.className='tt-block';
+    blk.style.cssText=`background:${c.color||'#7c6dfa'};top:${topPx}px;height:${hPx}px;`;
+    blk.innerHTML=`<div class="tt-bname">${icon?icon+' ':''}${c.name}</div><div class="tt-broom">${c.room||''}</div>${c.prof?`<div class="tt-bprof">${c.prof}</div>`:''}<div class="tt-block-actions"><button class="tt-act" onclick="event.stopPropagation();editClass('${c.id}')">✏️</button><button class="tt-act" onclick="event.stopPropagation();delClass('${c.id}')">✕</button></div>`;
+    cell.appendChild(blk);
+  });
+}
+
+// 요일 체크박스 helpers
+function getSelDays(){return[...document.querySelectorAll('#cl-days input:checked')].map(x=>+x.value);}
+function setDayPreset(days){document.querySelectorAll('#cl-days input').forEach(x=>x.checked=days.includes(+x.value));updateDayLabels();}
+function updateDayLabels(){document.querySelectorAll('#cl-days label').forEach(l=>{const cb=l.querySelector('input');l.style.background=cb.checked?'var(--abg)':'';l.style.borderColor=cb.checked?'var(--accent)':'var(--border)';l.style.color=cb.checked?'var(--accent2)':'';});}
+document.addEventListener('change',e=>{if(e.target.closest('#cl-days'))updateDayLabels();});
+
 function showAddClass(d=0,h=9){
   editClassId=null;
   document.getElementById('cl-name').value='';
-  document.getElementById('cl-day').value=d;
   document.getElementById('cl-st').value=`${String(h).padStart(2,'0')}:00`;
   document.getElementById('cl-en').value=`${String(h+1).padStart(2,'0')}:30`;
   document.getElementById('cl-room').value='';
   document.getElementById('cl-prof').value='';
-  selColor=CCOLORS[0];
+  document.getElementById('cl-category').value='lecture';
+  setDayPreset([d]);
+  selColor=CCOLORS[classes.length%CCOLORS.length];
   renderCP();
-  document.querySelector('#m-class .mh').childNodes[0].nodeValue='수업 추가 ';
+  document.getElementById('m-class-title').childNodes[0].nodeValue='수업 / 일정 추가 ';
   document.getElementById('cl-save-btn').textContent='추가';
   document.getElementById('cl-save-btn').onclick=saveClass;
   openM('m-class');
@@ -1100,14 +1180,15 @@ function editClass(id){
   const c=classes.find(x=>String(x.id)===String(id));if(!c)return;
   editClassId=id;
   document.getElementById('cl-name').value=c.name;
-  document.getElementById('cl-day').value=c.day;
   document.getElementById('cl-st').value=c.start;
   document.getElementById('cl-en').value=c.end;
   document.getElementById('cl-room').value=c.room||'';
   document.getElementById('cl-prof').value=c.prof||'';
+  document.getElementById('cl-category').value=c.category||'lecture';
+  setDayPreset([c.day]);
   selColor=c.color||CCOLORS[0];
   renderCP();
-  document.querySelector('#m-class .mh').childNodes[0].nodeValue='수업 수정 ';
+  document.getElementById('m-class-title').childNodes[0].nodeValue='수업 수정 ';
   document.getElementById('cl-save-btn').textContent='저장';
   document.getElementById('cl-save-btn').onclick=updateClass;
   openM('m-class');
@@ -1120,19 +1201,43 @@ function renderCP(){
 function saveClass(){
   const name=document.getElementById('cl-name').value.trim();
   if(!name){toast('과목명을 입력해주세요','err');return;}
-  classes.push({id:uid(),name,day:+document.getElementById('cl-day').value,start:document.getElementById('cl-st').value,end:document.getElementById('cl-en').value,room:document.getElementById('cl-room').value,prof:document.getElementById('cl-prof').value,color:selColor});
-  S('classes');closeM('m-class');renderTT();toast('수업 추가됨 ✅');
+  const days=getSelDays();
+  if(!days.length){toast('요일을 선택해주세요','err');return;}
+  const base={name,start:document.getElementById('cl-st').value,end:document.getElementById('cl-en').value,room:document.getElementById('cl-room').value,prof:document.getElementById('cl-prof').value,category:document.getElementById('cl-category').value,color:selColor};
+  days.forEach(d=>classes.push({id:uid(),...base,day:d}));
+  S('classes');closeM('m-class');renderTT();toast(`${days.length}개 요일에 수업 추가됨 ✅`);
 }
 
 function updateClass(){
   const name=document.getElementById('cl-name').value.trim();
   if(!name){toast('과목명을 입력해주세요','err');return;}
+  const days=getSelDays();
+  if(!days.length){toast('요일을 선택해주세요','err');return;}
   const i=classes.findIndex(c=>String(c.id)===String(editClassId));if(i<0)return;
-  classes[i]={...classes[i],name,day:+document.getElementById('cl-day').value,start:document.getElementById('cl-st').value,end:document.getElementById('cl-en').value,room:document.getElementById('cl-room').value,prof:document.getElementById('cl-prof').value,color:selColor};
+  const oldClass=classes[i];
+  // 기존 같은 이름+시간 수업 찾아서 선택된 요일로 교체
+  const sameName=classes.filter(c=>c.name===oldClass.name&&c.start===oldClass.start&&c.end===oldClass.end);
+  const sameIds=new Set(sameName.map(c=>String(c.id)));
+  classes=classes.filter(c=>!sameIds.has(String(c.id)));
+  const base={name,start:document.getElementById('cl-st').value,end:document.getElementById('cl-en').value,room:document.getElementById('cl-room').value,prof:document.getElementById('cl-prof').value,category:document.getElementById('cl-category').value,color:selColor};
+  days.forEach(d=>classes.push({id:uid(),...base,day:d}));
   S('classes');closeM('m-class');renderTT();toast('수업 수정됨 ✅');
 }
 
-function delClass(id){if(!confirm('수업을 삭제할까요?'))return;classes=classes.filter(c=>String(c.id)!==String(id));S('classes');renderTT();toast('수업 삭제됨');}
+function delClass(id){
+  const c=classes.find(x=>String(x.id)===String(id));if(!c)return;
+  // 같은 수업 전체 삭제 or 이것만 삭제 선택
+  const same=classes.filter(x=>x.name===c.name&&x.start===c.start&&x.end===c.end);
+  if(same.length>1){
+    const all=confirm(`"${c.name}" 수업이 ${same.length}개 요일에 있어요.\n\n[확인] 모든 요일 삭제\n[취소] 이 요일(${DAYS[c.day]})만 삭제`);
+    if(all){classes=classes.filter(x=>!(x.name===c.name&&x.start===c.start&&x.end===c.end));}
+    else{classes=classes.filter(x=>String(x.id)!==String(id));}
+  }else{
+    if(!confirm('수업을 삭제할까요?'))return;
+    classes=classes.filter(x=>String(x.id)!==String(id));
+  }
+  S('classes');renderTT();toast('수업 삭제됨');
+}
 
 function importMyTT(){
   ttParsed=[
@@ -1263,24 +1368,76 @@ function renderTasks(){
 }
 
 // ══ CLUBS ══
-function showAddClub(){openM('m-club');['cb-name','cb-emoji','cb-role','cb-note'].forEach(id=>document.getElementById(id).value='');}
+const CTYPES={club:'🎭 동아리',study:'📖 스터디',council:'🏛 학생회',volunteer:'🤝 봉사',sport:'⚽ 운동',etc:'📌 기타'};
+const CETYPES={meet:'👥 모임',study:'📖 스터디',event:'🎉 행사',contest:'🏆 대회',etc:'📌 기타'};
+
+function showAddClub(){
+  document.getElementById('m-club-title').childNodes[0].nodeValue='동아리 / 활동 추가 ';
+  document.getElementById('cb-save-btn').textContent='추가';
+  document.getElementById('cb-save-btn').onclick=saveClub;
+  ['cb-name','cb-emoji','cb-role','cb-members','cb-place','cb-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cb-type').value='club';
+  openM('m-club');
+}
+
 function saveClub(){
   const name=document.getElementById('cb-name').value.trim();if(!name){toast('이름을 입력하세요','err');return;}
-  clubs.push({id:uid(),name,emoji:document.getElementById('cb-emoji').value||'🎭',role:document.getElementById('cb-role').value,note:document.getElementById('cb-note').value,events:[]});
-  S('clubs');closeM('m-club');renderClubs();toast('동아리 추가됨 ✅');
+  clubs.push({id:uid(),name,type:document.getElementById('cb-type').value,emoji:document.getElementById('cb-emoji').value||getClubEmoji(document.getElementById('cb-type').value),role:document.getElementById('cb-role').value,members:document.getElementById('cb-members').value,place:document.getElementById('cb-place').value,note:document.getElementById('cb-note').value,events:[]});
+  S('clubs');closeM('m-club');renderClubs();toast('추가됨 ✅');
 }
+
+function getClubEmoji(type){return{club:'🎭',study:'📖',council:'🏛',volunteer:'🤝',sport:'⚽',etc:'📌'}[type]||'📌';}
+
+function editClub(id){
+  const c=clubs.find(x=>x.id==id);if(!c)return;
+  document.getElementById('m-club-title').childNodes[0].nodeValue='활동 수정 ';
+  document.getElementById('cb-save-btn').textContent='저장';
+  document.getElementById('cb-save-btn').onclick=()=>{
+    const name=document.getElementById('cb-name').value.trim();if(!name){toast('이름을 입력하세요','err');return;}
+    const i=clubs.findIndex(x=>x.id==id);if(i<0)return;
+    clubs[i]={...clubs[i],name,type:document.getElementById('cb-type').value,emoji:document.getElementById('cb-emoji').value||clubs[i].emoji,role:document.getElementById('cb-role').value,members:document.getElementById('cb-members').value,place:document.getElementById('cb-place').value,note:document.getElementById('cb-note').value};
+    S('clubs');closeM('m-club');renderClubs();toast('수정됨 ✅');
+  };
+  document.getElementById('cb-name').value=c.name;
+  document.getElementById('cb-type').value=c.type||'club';
+  document.getElementById('cb-emoji').value=c.emoji||'';
+  document.getElementById('cb-role').value=c.role||'';
+  document.getElementById('cb-members').value=c.members||'';
+  document.getElementById('cb-place').value=c.place||'';
+  document.getElementById('cb-note').value=c.note||'';
+  openM('m-club');
+}
+
 function selClub(id){selClubId=id;renderClubs();}
+
 function renderClubs(){
   const el=document.getElementById('club-list');const emp=document.getElementById('club-empty');
   if(!clubs.length){el.innerHTML='';emp.style.display='';return;}
   emp.style.display='none';
-  el.innerHTML=clubs.map(c=>`<div class="club-card ${c.id==selClubId?'sel':''}" onclick="selClub(${c.id})">
-    <div style="display:flex;align-items:center;gap:9px;margin-bottom:5px"><div style="font-size:20px">${c.emoji||'🎭'}</div><div><div style="font-size:13px;font-weight:600">${c.name}</div><div style="font-size:10.5px;color:var(--text3)">${c.role||'부원'}</div></div></div>
-    <div style="display:flex;gap:5px;justify-content:flex-end">
-      <div class="chip" onclick="event.stopPropagation();editClub(${c.id})">수정</div>
-      <div class="chip del" onclick="event.stopPropagation();delClub(${c.id})">삭제</div>
-    </div>
-  </div>`).join('');
+  el.innerHTML=clubs.map(c=>{
+    const typeLabel=CTYPES[c.type||'club']||'📌 기타';
+    const upcoming=c.events.filter(e=>e.date&&daysUntil(e.date)>=0).length;
+    return`<div class="club-card ${c.id==selClubId?'sel':''}" onclick="selClub(${c.id})">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
+        <div style="font-size:22px">${c.emoji||'🎭'}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${c.name}</div>
+          <div style="font-size:10.5px;color:var(--text3)">${typeLabel}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px">
+        ${c.role?`<span class="tag tp">${c.role}</span>`:''}
+        ${c.members?`<span class="tag tg">${c.members}</span>`:''}
+        ${upcoming?`<span class="tag ta">일정 ${upcoming}개</span>`:''}
+      </div>
+      ${c.place?`<div style="font-size:10.5px;color:var(--text3);margin-bottom:5px">📍 ${c.place}</div>`:''}
+      <div style="display:flex;gap:5px;justify-content:flex-end">
+        <div class="chip" onclick="event.stopPropagation();addToTT(${c.id})">시간표에 추가</div>
+        <div class="chip" onclick="event.stopPropagation();editClub(${c.id})">수정</div>
+        <div class="chip del" onclick="event.stopPropagation();delClub(${c.id})">삭제</div>
+      </div>
+    </div>`;
+  }).join('');
   if(selClubId){
     const c=clubs.find(x=>x.id==selClubId);
     document.getElementById('ce-title').textContent=c?`${c.emoji||'🎭'} ${c.name} — 일정`:'일정';
@@ -1288,29 +1445,74 @@ function renderClubs(){
     renderCE(c);
   }
 }
-function editClub(id){
-  const c=clubs.find(x=>x.id==id);if(!c)return;
-  document.getElementById('cb-name').value=c.name;document.getElementById('cb-emoji').value=c.emoji||'';document.getElementById('cb-role').value=c.role||'';document.getElementById('cb-note').value=c.note||'';
-  openM('m-club');
+
+function addToTT(clubId){
+  const c=clubs.find(x=>x.id==clubId);if(!c)return;
+  // 동아리/스터디를 시간표에 빠르게 추가
+  document.getElementById('cl-name').value=c.name;
+  document.getElementById('cl-category').value=c.type==='study'?'study':'club';
+  selColor=c.type==='study'?'#3ecf8e':'#ff6b9d';
+  setDayPreset([]);
+  renderCP();
+  document.getElementById('m-class-title').childNodes[0].nodeValue=`"${c.name}" 시간표 추가 `;
+  document.getElementById('cl-save-btn').textContent='추가';
+  document.getElementById('cl-save-btn').onclick=saveClass;
+  openM('m-class');
+  toast(`"${c.name}" 이름이 입력됐어요. 요일과 시간을 선택하세요!`);
 }
-function delClub(id){if(!confirm('동아리를 삭제할까요?'))return;clubs=clubs.filter(c=>c.id!=id);if(selClubId==id)selClubId=null;S('clubs');renderClubs();}
-function showAddCE(){if(!selClubId){toast('동아리를 먼저 선택하세요','err');return;}openM('m-ce');['ce-name','ce-place','ce-note'].forEach(id=>document.getElementById(id).value='');}
+
+function delClub(id){if(!confirm('삭제할까요?'))return;clubs=clubs.filter(c=>c.id!=id);if(selClubId==id)selClubId=null;S('clubs');renderClubs();}
+
+function showAddCE(){
+  if(!selClubId){toast('동아리를 먼저 선택하세요','err');return;}
+  openM('m-ce');
+  ['ce-name','ce-place','ce-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ce-date').value='';
+  document.getElementById('ce-type').value='meet';
+}
+
 function saveCE(){
   const c=clubs.find(x=>x.id==selClubId);if(!c)return;
   const name=document.getElementById('ce-name').value.trim();if(!name){toast('일정명을 입력하세요','err');return;}
-  c.events.push({id:uid(),name,date:document.getElementById('ce-date').value,place:document.getElementById('ce-place').value,note:document.getElementById('ce-note').value});
+  c.events.push({id:uid(),name,type:document.getElementById('ce-type').value,date:document.getElementById('ce-date').value,place:document.getElementById('ce-place').value,note:document.getElementById('ce-note').value});
   S('clubs');closeM('m-ce');renderCE(c);toast('일정 추가됨 ✅');
 }
+
 function renderCE(c){
   const el=document.getElementById('club-events');const emp=document.getElementById('ce-empty');
-  if(!c||!c.events.length){el.innerHTML='';emp.style.display='';return;}
+  if(!c||!c.events.length){el.innerHTML='';emp.style.display='';emp.querySelector('h3').textContent='등록된 일정 없음';return;}
   emp.style.display='none';
-  el.innerHTML=[...c.events].sort((a,b)=>new Date(a.date)-new Date(b.date)).map(e=>`<div class="cevt">
-    <div class="cevt-date">${(e.date||'').replace('T',' ').slice(0,16)||'날짜 없음'}</div>
-    <div style="flex:1"><div style="font-size:12.5px;font-weight:500">${e.name}</div><div style="font-size:10.5px;color:var(--text3)">${e.place||''} ${e.note||''}</div></div>
-    <div class="chip del" onclick="delCE(${c.id},${e.id})">✕</div>
-  </div>`).join('');
+  const sorted=[...c.events].sort((a,b)=>new Date(a.date||'9999')-new Date(b.date||'9999'));
+  el.innerHTML=sorted.map(e=>{
+    const d=e.date?daysUntil(e.date):null;
+    const past=d!==null&&d<0;
+    const dc=d!==null&&!past&&d<=3?'var(--red)':d!==null&&!past&&d<=7?'var(--amber)':'var(--text3)';
+    const typeLabel=CETYPES[e.type||'meet']||'📌';
+    return`<div class="cevt" style="${past?'opacity:.5':''}">
+      <div class="cevt-date">
+        <div style="font-size:10px;color:var(--accent2);margin-bottom:2px">${typeLabel}</div>
+        <div style="font-size:10.5px;color:var(--text3)">${(e.date||'').replace('T',' ').slice(0,16)||'날짜 없음'}</div>
+        ${d!==null?`<div style="font-size:10px;font-weight:600;color:${dc}">${past?`+${Math.abs(d)}일 전`:`D-${d}`}</div>`:''}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:12.5px;font-weight:500">${e.name}</div>
+        <div style="font-size:10.5px;color:var(--text3)">${e.place||''} ${e.note?'· '+e.note:''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div class="chip" onclick="addCEToTask('${c.id}','${e.id}')">과제등록</div>
+        <div class="chip del" onclick="delCE(${c.id},${e.id})">✕</div>
+      </div>
+    </div>`;
+  }).join('');
 }
+
+function addCEToTask(cid,eid){
+  const c=clubs.find(x=>x.id==cid);if(!c)return;
+  const e=c.events.find(x=>x.id==eid);if(!e)return;
+  tasks.push({id:uid(),title:e.name,subject:c.name,type:'etc',due:e.date||'',note:e.place||'',done:false,created:new Date().toISOString()});
+  S('tasks');updateBadge();toast(`"${e.name}" 과제 스케줄에 등록됨 ✅`);
+}
+
 function delCE(cid,eid){const c=clubs.find(x=>x.id==cid);if(!c)return;c.events=c.events.filter(e=>e.id!=eid);S('clubs');renderCE(c);}
 
 // ══ DDAY ══
