@@ -1387,9 +1387,14 @@ function renderHome(){
   const tc=classes.filter(c=>c.day===tod).sort((a,b)=>a.start.localeCompare(b.start));
   const tcEl=document.getElementById('h-today');
   tcEl.innerHTML=tc.length?tc.map(c=>`<div class="tc-item" style="border-color:${c.color||'var(--accent)'}"><div class="tc-time">${c.start}~${c.end}</div><div><div class="tc-name">${c.name}</div><div class="tc-room">${c.room||''}</div></div></div>`).join(''):`<div style="font-size:12px;color:var(--text3)">오늘 수업 없음 🎉</div>`;
-  const up=tasks.filter(t=>!t.done&&t.due).sort((a,b)=>new Date(a.due)-new Date(b.due)).slice(0,5);
+  const up=tasks.filter(t=>t.due).sort((a,b)=>new Date(a.due)-new Date(b.due)).slice(0,6);
   const dEl=document.getElementById('h-dead');
-  dEl.innerHTML=up.length?up.map(t=>{const d=daysUntil(t.due);const c=d<=1?'var(--red)':d<=3?'var(--amber)':'var(--text3)';return`<div class="dl-item"><div class="dl-dot" style="background:${c}"></div><div class="dl-info"><div class="dl-title">${t.title}</div><div class="dl-sub">${t.subject||'—'}</div></div><div class="dl-due" style="color:${c}">D-${d}</div></div>`}).join(''):`<div style="font-size:12px;color:var(--text3)">다가오는 마감 없음 🎉</div>`;
+  dEl.innerHTML=up.length?up.map(t=>{
+    const d=daysUntil(t.due);
+    const c=t.done?'var(--green)':d<=0?'var(--red)':d<=3?'var(--amber)':'var(--text3)';
+    const badge=t.done?'완료 ✓':d<=0?'마감됨':`D-${d}`;
+    return`<div class="dl-item" style="${t.done?'opacity:.7':''}"><div class="dl-dot" style="background:${c}"></div><div class="dl-info"><div class="dl-title" style="${t.done?'color:var(--text2)':''}">${t.done?'✓ ':''}${t.title}</div><div class="dl-sub">${t.subject||'—'}</div></div><div class="dl-due" style="color:${c};font-size:11px">${badge}</div></div>`
+  }).join(''):`<div style="font-size:12px;color:var(--text3)">마감 일정 없음</div>`;
   const evts=clubs.flatMap(c=>c.events.map(e=>({...e,cn:c.name,ce:c.emoji||'🎭'}))).filter(e=>e.date&&daysUntil(e.date)>=0&&daysUntil(e.date)<=7).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,4);
   document.getElementById('h-club').innerHTML=evts.length?evts.map(e=>`<div class="cevt"><div class="cevt-date">${(e.date||'').replace('T',' ').slice(5,16)}</div><div><div style="font-size:12.5px;font-weight:500">${e.ce} ${e.name}</div><div style="font-size:10.5px;color:var(--text3)">${e.place||''}</div></div></div>`).join(''):`<div style="font-size:12px;color:var(--text3)">이번 주 동아리 일정 없음</div>`;
   document.getElementById('h-dday').innerHTML=ddays.slice(0,4).map(d=>{const n=daysUntil(d.date);const c=n<=3?'var(--red)':n<=7?'var(--amber)':'var(--accent2)';return`<div class="dd-row"><span class="dd-name">${d.emoji||'📌'} ${d.name}</span><span class="dd-num" style="color:${c}">${n<0?`+${Math.abs(n)}`:`D-${n}`}</span></div>`}).join('')||`<div style="font-size:12px;color:var(--text3)">D-day 없음</div>`;
@@ -1720,8 +1725,23 @@ function renderTasks(){
   el.innerHTML = out;
   const tot=tasks.length,done=tasks.filter(t=>t.done).length,urg=tasks.filter(t=>!t.done&&t.due&&daysUntil(t.due)<=3).length;
   document.getElementById('t-stats').innerHTML=[['전체',tot,'var(--text)'],['진행 중',tot-done,'var(--accent2)'],['완료',done,'var(--green)'],['3일 내 마감',urg,urg?'var(--red)':'var(--text)']].map(([l,v,c])=>`<div class="sr"><span style="color:var(--text2)">${l}</span><span style="font-weight:600;color:${c}">${v}</span></div>`).join('');
-  const upt=tasks.filter(t=>!t.done&&t.due).sort((a,b)=>new Date(a.due)-new Date(b.due)).slice(0,5);
-  document.getElementById('t-up').innerHTML=upt.length?upt.map(t=>{const d=daysUntil(t.due);const c=d<=1?'var(--red)':d<=3?'var(--amber)':'var(--text2)';return`<div style="padding:7px 0;border-bottom:1px solid var(--border)"><div style="font-size:12.5px;font-weight:500">${t.title}</div><div style="font-size:10.5px;color:${c};margin-top:2px">D-${d} · ${t.subject||'—'}</div></div>`;}).join(''):`<div style="font-size:12px;color:var(--text3)">임박 마감 없음 🎉</div>`;
+  // 임박 마감 — 완료 여부 상관없이 due 있는 것 전부 표시, 마감 지난 것도 포함
+  const upt=tasks.filter(t=>t.due).sort((a,b)=>new Date(a.due)-new Date(b.due)).slice(0,8);
+  document.getElementById('t-up').innerHTML=upt.length?upt.map(t=>{
+    const d=daysUntil(t.due);
+    const c=t.done?'var(--green)':d<=0?'var(--red)':d<=1?'var(--red)':d<=3?'var(--amber)':'var(--text2)';
+    const badge=t.done
+      ?`<span style="font-size:10px;padding:1px 7px;border-radius:20px;background:var(--gbg);color:var(--green);font-weight:600">완료 ✓</span>`
+      :d<=0?`<span style="font-size:10px;padding:1px 7px;border-radius:20px;background:var(--rbg);color:var(--red);font-weight:600">마감됨</span>`
+      :`<span style="font-size:10px;font-weight:600;color:${c}">D-${d}</span>`;
+    return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);${t.done?'opacity:.7':''}">
+      <div style="flex:1">
+        <div style="font-size:12.5px;font-weight:500;${t.done?'color:var(--text2)':''}">${t.done?'✓ ':' '}${t.title}</div>
+        <div style="font-size:10.5px;color:var(--text3);margin-top:2px">${t.subject||'—'} · ${new Date(t.due).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+      ${badge}
+    </div>`;
+  }).join(''):`<div style="font-size:12px;color:var(--text3)">마감 일정 없음</div>`;
 }
 
 // ══ CLUBS ══
