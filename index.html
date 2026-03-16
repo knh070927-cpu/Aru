@@ -311,37 +311,39 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;col
 .ibanner{background:var(--abg);border:1px solid var(--aborder);border-radius:var(--rlg);padding:16px 18px;display:flex;gap:12px;align-items:center;margin-bottom:18px;}
 
 /* ── CALENDAR ── */
-.cal-layout{display:grid;grid-template-columns:1fr 260px;gap:14px;align-items:start;}
-.cal-nav{display:flex;align-items:center;gap:10px;}
-.cal-nav-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:14px;transition:all .15s;}
+.cal-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:0 0 12px;}
+.cal-nav{display:flex;align-items:center;gap:8px;}
+.cal-nav-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:16px;transition:all .15s;}
 .cal-nav-btn:hover{background:var(--bg4);color:var(--text);}
-.cal-month{font-size:16px;font-weight:600;min-width:100px;text-align:center;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border-radius:var(--r);overflow:hidden;}
-.cal-dow{background:var(--bg3);padding:6px 0;text-align:center;font-size:10.5px;font-weight:600;color:var(--text3);}
+.cal-month{font-size:17px;font-weight:600;min-width:90px;text-align:center;}
+.cal-body-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border-radius:var(--r) var(--r) 0 0;overflow:hidden;flex-shrink:0;}
+.cal-dow{background:var(--bg3);padding:7px 0;text-align:center;font-size:11px;font-weight:600;color:var(--text3);}
 .cal-dow.sun{color:var(--red);}
 .cal-dow.sat{color:var(--blue);}
-.cal-day{background:var(--bg2);padding:5px 6px;min-height:80px;cursor:pointer;transition:background .15s;position:relative;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border-radius:0 0 var(--r) var(--r);overflow:hidden;flex:1;}
+.cal-day{background:var(--bg2);padding:6px 7px;cursor:pointer;transition:background .15s;position:relative;min-height:70px;}
 .cal-day:hover{background:var(--bg3);}
-.cal-day.today{background:var(--abg);}
-.cal-day.today .cal-day-n{color:var(--accent2);font-weight:700;}
-.cal-day.other{background:var(--bg);opacity:.5;}
-.cal-day.selected{outline:2px solid var(--accent);outline-offset:-2px;}
-.cal-day-n{font-size:12px;font-weight:500;margin-bottom:3px;}
-.cal-day.sun .cal-day-n{color:var(--red);}
-.cal-day.sat .cal-day-n{color:var(--blue);}
-.cal-event{font-size:10px;padding:1px 5px;border-radius:3px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;}
-.cal-event:hover{opacity:.8;}
-.cal-more{font-size:9.5px;color:var(--text3);margin-top:1px;}
-.cal-side{display:flex;flex-direction:column;gap:10px;}
-.cal-day-detail{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:14px;}
-.cal-det-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
-.cal-det-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
-.cal-det-item:last-child{border:none;}
+.cal-day.today{background:rgba(124,109,250,.08);}
+.cal-day.today .cal-dn{color:var(--accent2);font-weight:700;background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.cal-day.other{background:var(--bg);opacity:.4;}
+.cal-day.selected{outline:2px solid var(--accent);outline-offset:-1px;background:var(--abg);}
+.cal-dn{font-size:12px;font-weight:500;margin-bottom:4px;display:inline-flex;align-items:center;justify-content:center;min-width:20px;}
+.cal-day.sun .cal-dn{color:var(--red);}
+.cal-day.sat .cal-dn{color:var(--blue);}
+.cal-ev{font-size:10px;padding:1px 5px;border-radius:3px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cal-more{font-size:9.5px;color:var(--text3);padding-left:2px;}
+.cal-panel{flex-shrink:0;background:var(--bg2);border-top:1px solid var(--border);padding:14px;overflow-y:auto;max-height:220px;}
+.cal-pan-hd{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.cal-det-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.cal-det-item:last-child{border:none;padding-bottom:0;}
 .cal-det-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
-.cal-det-info{flex:1;}
-.cal-det-name{font-size:12.5px;font-weight:500;}
-.cal-det-sub{font-size:10.5px;color:var(--text3);}
-.cal-det-time{font-size:10.5px;color:var(--text3);flex-shrink:0;}
+.cal-det-info{flex:1;min-width:0;}
+.cal-det-name{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-det-sub{font-size:10.5px;color:var(--text3);margin-top:1px;}
+.cal-det-acts{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.cal-det-time{font-size:10.5px;color:var(--text3);flex-shrink:0;margin-left:4px;}
 .legend-row{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text2);margin-bottom:5px;}
 .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
@@ -950,66 +952,50 @@ lower_bound(v.begin(),v.end(),x);</pre></div>
 </div><!-- #main -->
 
 <!-- ===== CALENDAR ===== -->
-<div class="page" id="p-cal">
+<div class="page" id="p-cal" style="overflow:hidden;">
   <div class="topbar">
-    <div class="tb-l"><h1>📆 달력</h1><p>모든 일정을 한눈에 — 과제·수업·동아리·개인 일정</p></div>
+    <div class="tb-l"><h1>📆 달력</h1><p>과제·동아리·개인 일정 통합 관리</p></div>
     <div class="tb-r">
-      <button class="btn" onclick="exportICS()">📥 Google 캘린더로 내보내기</button>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#f04747;display:inline-block"></span>과제</span>
+        <span style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#ff6b9d;display:inline-block"></span>동아리</span>
+        <span style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#3ecf8e;display:inline-block"></span>개인</span>
+        <span style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>D-day</span>
+      </div>
+      <button class="btn" onclick="exportICS()">📥 내보내기</button>
       <button class="btn pri" onclick="openAddPersonal()">+ 개인 일정</button>
     </div>
   </div>
-  <div class="scroll">
-    <div class="cal-layout">
-      <div>
-        <!-- 달력 헤더 -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div class="cal-nav">
-            <div class="cal-nav-btn" onclick="calMove(-1)">‹</div>
-            <div class="cal-month" id="cal-month-lbl"></div>
-            <div class="cal-nav-btn" onclick="calMove(1)">›</div>
-          </div>
-          <button class="btn" onclick="calToday()">오늘</button>
-        </div>
-        <!-- 달력 그리드 -->
-        <div class="cal-grid">
-          <div class="cal-dow sun">일</div>
-          <div class="cal-dow">월</div>
-          <div class="cal-dow">화</div>
-          <div class="cal-dow">수</div>
-          <div class="cal-dow">목</div>
-          <div class="cal-dow">금</div>
-          <div class="cal-dow sat">토</div>
-        </div>
-        <div class="cal-grid" id="cal-body" style="margin-top:1px"></div>
+  <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding:14px 20px 0;">
+    <div class="cal-header">
+      <div class="cal-nav">
+        <div class="cal-nav-btn" onclick="calMove(-1)">‹</div>
+        <div class="cal-month" id="cal-month-lbl"></div>
+        <div class="cal-nav-btn" onclick="calMove(1)">›</div>
       </div>
-
-      <!-- 사이드 패널 -->
-      <div class="cal-side">
-        <!-- 선택한 날 상세 -->
-        <div class="cal-day-detail">
-          <div class="cal-det-title">
-            <span id="cal-det-date">날짜를 선택하세요</span>
-            <button class="btn" style="font-size:10.5px;padding:3px 8px" onclick="openAddPersonal(calSelDate)">+ 추가</button>
-          </div>
-          <div id="cal-det-list"><div class="empty-msg">이날 일정 없음</div></div>
-        </div>
-
-        <!-- 범례 -->
-        <div class="card">
-          <div class="ctitle">범례</div>
-          <div class="legend-row"><div class="legend-dot" style="background:#f04747"></div>과제 / 시험 / 마감</div>
-          <div class="legend-row"><div class="legend-dot" style="background:#7c6dfa"></div>수업</div>
-          <div class="legend-row"><div class="legend-dot" style="background:#ff6b9d"></div>동아리 / 스터디 일정</div>
-          <div class="legend-row"><div class="legend-dot" style="background:#3ecf8e"></div>개인 일정</div>
-          <div class="legend-row"><div class="legend-dot" style="background:#f59e0b"></div>D-day / 기념일</div>
-        </div>
-
-        <!-- 이번 달 요약 -->
-        <div class="card">
-          <div class="ctitle">이번 달 요약</div>
-          <div id="cal-month-summary"></div>
-        </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div id="cal-month-cnt" style="font-size:11.5px;color:var(--text3)"></div>
+        <button class="btn" onclick="calToday()">오늘</button>
       </div>
+    </div>
+    <div class="cal-body-wrap">
+      <div class="cal-dow-row">
+        <div class="cal-dow sun">일</div>
+        <div class="cal-dow">월</div>
+        <div class="cal-dow">화</div>
+        <div class="cal-dow">수</div>
+        <div class="cal-dow">목</div>
+        <div class="cal-dow">금</div>
+        <div class="cal-dow sat">토</div>
+      </div>
+      <div class="cal-grid" id="cal-body"></div>
+    </div>
+    <div class="cal-panel">
+      <div class="cal-pan-hd">
+        <span id="cal-det-date" style="color:var(--text2)">날짜를 선택하세요</span>
+        <button class="btn" style="font-size:10.5px;padding:3px 9px" onclick="openAddPersonal(calSelDate)">+ 일정 추가</button>
+      </div>
+      <div id="cal-det-list"><div style="font-size:12px;color:var(--text3)">날짜를 클릭하면 일정이 표시돼요</div></div>
     </div>
   </div>
 </div>
@@ -2475,39 +2461,29 @@ const CAT_COLORS = {
 
 function getCalEvents(year, month) {
   const evs = [];
-  const pad = (n) => String(n).padStart(2,'0');
+  const pad = n => String(n).padStart(2,'0');
   const prefix = `${year}-${pad(month+1)}`;
-  const days = new Date(year, month+1, 0).getDate();
 
-  // tasks with due date
+  // 과제/시험 마감
   tasks.forEach(t => {
     if(t.due && t.due.startsWith(prefix)) {
       const day = +t.due.slice(8,10);
-      evs.push({ day, label: t.title, color: CAT_COLORS[t.type]||'#f04747', type:'task', data:t });
+      const color = t.done ? '#3ecf8e' : (CAT_COLORS[t.type]||'#f04747');
+      evs.push({ day, label:(t.done?'✓ ':'')+t.title, color, type:'task', data:t });
     }
   });
 
-  // classes — repeat weekly
-  classes.forEach(c => {
-    const dow = c.day; // 0=월
-    for(let d=1; d<=days; d++) {
-      const date = new Date(year, month, d);
-      const dateDow = date.getDay() === 0 ? 6 : date.getDay()-1;
-      if(dateDow === dow) evs.push({ day:d, label:c.name, color:c.color||'#7c6dfa', type:'class', data:c });
-    }
-  });
-
-  // club events
+  // 동아리/스터디 일정
   clubs.forEach(cl => {
     cl.events.forEach(e => {
       if(e.date && e.date.startsWith(prefix)) {
         const day = +e.date.slice(8,10);
-        evs.push({ day, label:`${cl.emoji||'🎭'} ${e.name}`, color:'#ff6b9d', type:'club', data:e, clubName:cl.name });
+        evs.push({ day, label:`${cl.emoji||'🎭'} ${e.name}`, color:'#ff6b9d', type:'club', data:e, clubId:cl.id, clubName:cl.name });
       }
     });
   });
 
-  // ddays
+  // D-day
   ddays.forEach(d => {
     if(d.date && d.date.startsWith(prefix)) {
       const day = +d.date.slice(8,10);
@@ -2515,7 +2491,7 @@ function getCalEvents(year, month) {
     }
   });
 
-  // personal events
+  // 개인 일정
   personal.forEach(p => {
     if(p.date && p.date.startsWith(prefix)) {
       const day = +p.date.slice(8,10);
@@ -2527,26 +2503,24 @@ function getCalEvents(year, month) {
 }
 
 function renderCal() {
-  const lbl = document.getElementById('cal-month-lbl');
-  lbl.textContent = `${calYear}년 ${calMonth+1}월`;
+  document.getElementById('cal-month-lbl').textContent = `${calYear}년 ${calMonth+1}월`;
 
-  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const daysInPrev = new Date(calYear, calMonth, 0).getDate();
   const today = new Date();
   const isThisMonth = today.getFullYear()===calYear && today.getMonth()===calMonth;
 
   const evs = getCalEvents(calYear, calMonth);
-  // group by day
   const byDay = {};
   evs.forEach(e => { if(!byDay[e.day]) byDay[e.day]=[]; byDay[e.day].push(e); });
 
-  const body = document.getElementById('cal-body');
-  let cells = '';
   const total = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+  const MAX_EV = 3;
+  let cells = '';
 
   for(let i=0; i<total; i++) {
-    const col = i % 7; // 0=Sun
+    const col = i % 7;
     let day, isOther=false;
     if(i < firstDay) { day = daysInPrev - firstDay + i + 1; isOther=true; }
     else if(i >= firstDay+daysInMonth) { day = i - firstDay - daysInMonth + 1; isOther=true; }
@@ -2556,103 +2530,119 @@ function renderCal() {
     const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const isSel = calSelDate===dateStr;
     const dayEvs = isOther ? [] : (byDay[day]||[]);
-    const maxShow = 3;
-    const more = dayEvs.length > maxShow ? dayEvs.length - maxShow : 0;
+    const more = dayEvs.length > MAX_EV ? dayEvs.length - MAX_EV : 0;
 
-    const cls = [
-      'cal-day',
-      isOther?'other':'',
-      isToday?'today':'',
-      isSel?'selected':'',
-      col===0?'sun':'',
-      col===6?'sat':'',
-    ].filter(Boolean).join(' ');
-
-    const evHtml = dayEvs.slice(0,maxShow).map(e =>
-      `<div class="cal-event" style="background:${e.color}22;color:${e.color};border-left:2px solid ${e.color}" title="${e.label}">${e.label}</div>`
+    const cls = ['cal-day', isOther?'other':'', isToday?'today':'', isSel?'selected':'', col===0?'sun':'', col===6?'sat':''].filter(Boolean).join(' ');
+    const dnHtml = isToday
+      ? `<div class="cal-dn" style="background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">${day}</div>`
+      : `<div class="cal-dn">${day}</div>`;
+    const evHtml = dayEvs.slice(0,MAX_EV).map(e =>
+      `<div class="cal-ev" style="background:${e.color}20;color:${e.color};border-left:2px solid ${e.color}">${e.label}</div>`
     ).join('');
 
-    cells += `<div class="${cls}" onclick="selectCalDay('${dateStr}')">
-      <div class="cal-day-n">${day}</div>
-      ${evHtml}
-      ${more?`<div class="cal-more">+${more}개 더</div>`:''}
-    </div>`;
+    cells += `<div class="${cls}" onclick="selectCalDay('${dateStr}')">${dnHtml}${evHtml}${more?`<div class="cal-more">+${more}개</div>`:''}</div>`;
   }
-  body.innerHTML = cells;
+  document.getElementById('cal-body').innerHTML = cells;
 
-  // month summary
-  const allEvs = getCalEvents(calYear, calMonth);
-  const taskCnt = allEvs.filter(e=>e.type==='task').length;
-  const classCnt = new Set(allEvs.filter(e=>e.type==='class').map(e=>e.data.name)).size;
-  const clubCnt = allEvs.filter(e=>e.type==='club').length;
-  const persCnt = allEvs.filter(e=>e.type==='personal').length;
-  document.getElementById('cal-month-summary').innerHTML = [
-    ['📝 과제 / 시험', taskCnt+'개', '#f04747'],
-    ['📚 수업 종류', classCnt+'개', '#7c6dfa'],
-    ['🎭 동아리 일정', clubCnt+'개', '#ff6b9d'],
-    ['🙋 개인 일정', persCnt+'개', '#3ecf8e'],
-  ].map(([l,v,c])=>`<div class="sr"><span style="color:var(--text2)">${l}</span><span style="font-weight:600;color:${c}">${v}</span></div>`).join('');
+  // 이번 달 요약 카운트
+  const taskCnt=evs.filter(e=>e.type==='task').length;
+  const clubCnt=evs.filter(e=>e.type==='club').length;
+  const persCnt=evs.filter(e=>e.type==='personal').length;
+  const ddCnt=evs.filter(e=>e.type==='dday').length;
+  const cntEl=document.getElementById('cal-month-cnt');
+  if(cntEl) cntEl.textContent=`📝${taskCnt} 🎭${clubCnt} 🙋${persCnt} 📌${ddCnt}`;
 
   if(calSelDate) selectCalDay(calSelDate);
 }
 
 function selectCalDay(dateStr) {
   calSelDate = dateStr;
-  renderCal();
+  // 달력 다시 그리지 않고 선택 표시만 업데이트
+  document.querySelectorAll('.cal-day').forEach(el => {
+    el.classList.remove('selected');
+    const onclick = el.getAttribute('onclick');
+    if(onclick && onclick.includes(`'${dateStr}'`)) el.classList.add('selected');
+  });
 
   const d = new Date(dateStr);
   const DN = ['일','월','화','수','목','금','토'];
   document.getElementById('cal-det-date').textContent =
     `${d.getMonth()+1}월 ${d.getDate()}일 (${DN[d.getDay()]})`;
-  document.getElementById('cal-det-date').dataset.date = dateStr;
 
-  // collect all events for this date
   const evs = [];
-  const pad = n=>String(n).padStart(2,'0');
 
+  // 과제 마감
   tasks.filter(t=>t.due&&t.due.startsWith(dateStr)).forEach(t=>{
-    evs.push({ label:t.title, sub:TLBL[t.type]||'과제', color:CAT_COLORS[t.type]||'#f04747', time:t.due.slice(11,16)||'', actions:[
-      `<span class="chip" onclick="editTask(${t.id});closeM('m-task')">수정</span>`,
-    ]});
-  });
-
-  const dow = d.getDay()===0?6:d.getDay()-1;
-  classes.filter(c=>c.day===dow).sort((a,b)=>a.start.localeCompare(b.start)).forEach(c=>{
-    evs.push({ label:c.name, sub:c.room||'', color:c.color||'#7c6dfa', time:`${c.start}~${c.end}`, actions:[] });
-  });
-
-  clubs.forEach(cl=>{
-    cl.events.filter(e=>e.date&&e.date.startsWith(dateStr)).forEach(e=>{
-      evs.push({ label:`${cl.emoji||'🎭'} ${e.name}`, sub:cl.name+(e.place?' · '+e.place:''), color:'#ff6b9d', time:e.date.slice(11,16)||'', actions:[] });
+    evs.push({
+      label: t.title,
+      sub: (t.done?'✅ 완료 · ':'')+( TLBL[t.type]||'과제')+(t.subject?' · '+t.subject:''),
+      color: t.done?'#3ecf8e':(CAT_COLORS[t.type]||'#f04747'),
+      time: t.due.slice(11,16)||'',
+      actions: [
+        `<span class="chip" onclick="editTask(${t.id})">✏️ 수정</span>`,
+        `<span class="chip del" onclick="delTask(${t.id})">삭제</span>`,
+      ]
     });
   });
 
-  ddays.filter(dd=>dd.date&&dd.date.startsWith(dateStr)).forEach(dd=>{
-    const n = daysUntil(dd.date);
-    evs.push({ label:`${dd.emoji} ${dd.name}`, sub:`D-${n}`, color:'#f59e0b', time:'', actions:[] });
+  // 동아리 일정
+  clubs.forEach(cl=>{
+    cl.events.filter(e=>e.date&&e.date.startsWith(dateStr)).forEach(e=>{
+      evs.push({
+        label: `${cl.emoji||'🎭'} ${e.name}`,
+        sub: cl.name+(e.place?' · '+e.place:''),
+        color: '#ff6b9d',
+        time: e.date.slice(11,16)||'',
+        actions: [
+          `<span class="chip" onclick="editCE('${cl.id}','${e.id}')">✏️ 수정</span>`,
+          `<span class="chip del" onclick="delCE(${cl.id},${e.id})">삭제</span>`,
+        ]
+      });
+    });
   });
 
+  // D-day
+  ddays.filter(dd=>dd.date&&dd.date.startsWith(dateStr)).forEach(dd=>{
+    const n=daysUntil(dd.date);
+    evs.push({
+      label: `${dd.emoji||'📌'} ${dd.name}`,
+      sub: n===0?'🎯 오늘!':n>0?`D-${n}`:`+${Math.abs(n)}일 지남`,
+      color: '#f59e0b',
+      time: '',
+      actions: [
+        `<span class="chip" onclick="editDday(${dd.id})">✏️ 수정</span>`,
+        `<span class="chip del" onclick="delDday(${dd.id})">삭제</span>`,
+      ]
+    });
+  });
+
+  // 개인 일정
   personal.filter(p=>p.date&&p.date.startsWith(dateStr)).forEach(p=>{
-    const endTime = p.end ? `~${p.end}` : '';
-    evs.push({ label:p.title, sub:p.note||'', color:CAT_COLORS[p.category]||'#3ecf8e', time:(p.start||'')+endTime, actions:[
-      `<span class="chip" onclick="editPersonal('${p.id}')">수정</span>`,
-      `<span class="chip del" onclick="delPersonal('${p.id}')">삭제</span>`,
-    ]});
+    const timeStr = p.start?(p.end?`${p.start}~${p.end}`:p.start):'';
+    evs.push({
+      label: p.title,
+      sub: (PE_CATS[p.category]||'')+(p.note?' · '+p.note:''),
+      color: CAT_COLORS[p.category]||'#3ecf8e',
+      time: timeStr,
+      actions: [
+        `<span class="chip" onclick="editPersonal('${p.id}')">✏️ 수정</span>`,
+        `<span class="chip del" onclick="delPersonal('${p.id}')">삭제</span>`,
+      ]
+    });
   });
 
   const list = document.getElementById('cal-det-list');
   if(!evs.length){
-    list.innerHTML='<div class="empty-msg">이날 일정 없음</div>';
+    list.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0">이날 일정 없음 — 위의 + 일정 추가로 기록하세요</div>';
     return;
   }
-  // sort by time
   evs.sort((a,b)=>a.time.localeCompare(b.time));
   list.innerHTML = evs.map(e=>`<div class="cal-det-item">
     <div class="cal-det-dot" style="background:${e.color}"></div>
     <div class="cal-det-info">
       <div class="cal-det-name">${e.label}</div>
       ${e.sub?`<div class="cal-det-sub">${e.sub}</div>`:''}
-      ${e.actions?.length?`<div style="display:flex;gap:4px;margin-top:4px">${e.actions.join('')}</div>`:''}
+      ${e.actions?.length?`<div class="cal-det-acts">${e.actions.join('')}</div>`:''}
     </div>
     ${e.time?`<div class="cal-det-time">${e.time}</div>`:''}
   </div>`).join('');
