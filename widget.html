@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>아루 위젯</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d0d1f;--bg2:#141428;--bg3:#1a1a35;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);
+  --text:#eaeaf8;--text2:#9090b8;--text3:#52527a;
+  --accent:#7c6dfa;--accent2:#a096ff;--abg:rgba(124,109,250,.13);
+  --green:#3ecf8e;--gbg:rgba(62,207,142,.1);
+  --amber:#f59e0b;--ambg:rgba(245,158,11,.1);
+  --red:#f04747;--rbg:rgba(240,71,71,.1);
+}
+body{
+  font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;
+  background:var(--bg);color:var(--text);
+  width:320px;min-height:100vh;
+  overflow-x:hidden;
+  user-select:none;
+}
+.header{
+  padding:10px 14px 8px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg2);
+  cursor:move;
+}
+.logo{display:flex;align-items:center;gap:7px;}
+.logo img{width:22px;height:22px;border-radius:50%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:700;color:var(--text);}
+.logo-name span{color:var(--accent2);}
+.date-text{font-size:10px;color:var(--text3);}
+.open-btn{font-size:10px;padding:3px 9px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;}
+.open-btn:hover{background:var(--abg);color:var(--accent2);border-color:var(--accent2);}
+
+.section{padding:10px 14px;border-bottom:1px solid var(--border);}
+.section-title{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;}
+
+/* stat row */
+.stat-row{display:flex;gap:8px;}
+.stat-box{flex:1;background:var(--bg3);border-radius:7px;padding:8px 10px;text-align:center;}
+.stat-n{font-size:20px;font-weight:700;line-height:1;}
+.stat-l{font-size:9.5px;color:var(--text3);margin-top:2px;}
+
+/* class items */
+.cls-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);}
+.cls-item:last-child{border:none;}
+.cls-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.cls-name{font-size:12px;font-weight:500;flex:1;}
+.cls-time{font-size:10.5px;color:var(--text3);}
+.cls-room{font-size:10px;color:var(--text3);}
+
+/* deadline */
+.dl-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);}
+.dl-item:last-child{border:none;}
+.dl-title{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dl-badge{font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;flex-shrink:0;}
+.d-red{background:var(--rbg);color:var(--red);}
+.d-amber{background:var(--ambg);color:var(--amber);}
+.d-gray{background:var(--bg3);color:var(--text3);}
+
+/* dday */
+.dd-item{display:flex;align-items:center;justify-content:space-between;padding:4px 0;}
+.dd-name{font-size:11.5px;color:var(--text2);}
+.dd-n{font-size:14px;font-weight:700;}
+
+/* todo */
+.todo-item{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);}
+.todo-item:last-child{border:none;}
+.todo-chk{width:15px;height:15px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:8px;transition:all .15s;}
+.todo-chk.done{background:var(--green);border-color:var(--green);color:#fff;}
+.todo-title{font-size:11.5px;flex:1;}
+.todo-item.done-item .todo-title{text-decoration:line-through;color:var(--text3);}
+
+.empty-msg{font-size:11px;color:var(--text3);text-align:center;padding:8px 0;}
+.refresh-btn{font-size:10px;color:var(--text3);cursor:pointer;}
+.refresh-btn:hover{color:var(--accent2);}
+
+.footer{padding:7px 14px;display:flex;align-items:center;justify-content:space-between;}
+.last-update{font-size:9.5px;color:var(--text3);}
+
+/* 알림 배너 */
+.notif-banner{
+  display:none;
+  background:linear-gradient(90deg,#7c6dfa,#4a9eff);
+  color:#fff;
+  padding:7px 14px;
+  font-size:11.5px;
+  font-weight:500;
+}
+.notif-banner.on{display:block;}
+</style>
+</head>
+<body>
+
+<div id="notif-banner" class="notif-banner"></div>
+
+<div class="header">
+  <div class="logo">
+    <img src="icon-192.png" onerror="this.style.display='none'">
+    <div>
+      <div class="logo-name">✦ <span>아루</span></div>
+      <div class="date-text" id="w-date"></div>
+    </div>
+  </div>
+  <button class="open-btn" onclick="openMain()">앱 열기 →</button>
+</div>
+
+<!-- 통계 -->
+<div class="section">
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="stat-n" id="w-tasks" style="color:var(--accent2)">0</div>
+      <div class="stat-l">남은 과제</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-n" id="w-urgent" style="color:var(--red)">0</div>
+      <div class="stat-l">3일 내 마감</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-n" id="w-today-cls" style="color:var(--green)">0</div>
+      <div class="stat-l">오늘 수업</div>
+    </div>
+  </div>
+</div>
+
+<!-- 오늘 수업 -->
+<div class="section">
+  <div class="section-title">📅 오늘 수업</div>
+  <div id="w-classes"></div>
+</div>
+
+<!-- 다가오는 마감 -->
+<div class="section">
+  <div class="section-title">⏰ 다가오는 마감</div>
+  <div id="w-deadlines"></div>
+</div>
+
+<!-- 오늘 할 일 -->
+<div class="section">
+  <div class="section-title">✅ 오늘 할 일</div>
+  <div id="w-todos"></div>
+</div>
+
+<!-- D-day -->
+<div class="section">
+  <div class="section-title">📌 D-day</div>
+  <div id="w-ddays"></div>
+</div>
+
+<div class="footer">
+  <span class="last-update" id="w-updated">방금 업데이트</span>
+  <span class="refresh-btn" onclick="render()">↻ 새로고침</span>
+</div>
+
+<script>
+const ARUURL = 'https://knh070927-cpu.github.io/Aru/';
+const DAYS = ['월','화','수','목','금','토'];
+
+function openMain(){
+  window.open(ARUURL, '_blank');
+}
+
+function load(k, def=[]){
+  try{ return JSON.parse(localStorage.getItem('aru_'+k)||JSON.stringify(def)); }
+  catch(e){ return def; }
+}
+
+function daysUntil(d){
+  return Math.ceil((new Date(d) - new Date()) / 864e5);
+}
+
+function getTodayKey(){
+  const d=new Date();
+  return`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+function getWeekKey(){
+  const d=new Date();const day=d.getDay();
+  const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:day-1));
+  return`w${mon.getFullYear()}-${mon.getMonth()+1}-${mon.getDate()}`;
+}
+
+function render(){
+  const now = new Date();
+  const DN = ['일','월','화','수','목','금','토'];
+  document.getElementById('w-date').textContent =
+    `${now.getMonth()+1}월 ${now.getDate()}일 (${DN[now.getDay()]})`;
+
+  const tasks   = load('tasks');
+  const classes = load('classes');
+  const ddays   = load('ddays');
+  const todos   = load('todos');
+
+  // 통계
+  const rem = tasks.filter(t=>!t.done).length;
+  const urg = tasks.filter(t=>!t.done&&t.due&&daysUntil(t.due)<=3).length;
+  const todayDay = now.getDay()-1; // 0=월
+  const todayCls = classes.filter(c=>c.day===todayDay).sort((a,b)=>a.start.localeCompare(b.start));
+  document.getElementById('w-tasks').textContent = rem;
+  document.getElementById('w-urgent').textContent = urg;
+  document.getElementById('w-today-cls').textContent = todayCls.length;
+
+  // 오늘 수업
+  const clsEl = document.getElementById('w-classes');
+  if(!todayCls.length){
+    clsEl.innerHTML = '<div class="empty-msg">오늘 수업 없음 🎉</div>';
+  } else {
+    clsEl.innerHTML = todayCls.map(c=>`
+      <div class="cls-item">
+        <div class="cls-dot" style="background:${c.color||'#7c6dfa'}"></div>
+        <div style="flex:1">
+          <div class="cls-name">${c.name}</div>
+          <div class="cls-room">${c.room||''}</div>
+        </div>
+        <div class="cls-time">${c.start}~${c.end}</div>
+      </div>`).join('');
+  }
+
+  // 마감
+  const up = tasks.filter(t=>!t.done&&t.due)
+    .sort((a,b)=>new Date(a.due)-new Date(b.due)).slice(0,5);
+  const dlEl = document.getElementById('w-deadlines');
+  if(!up.length){
+    dlEl.innerHTML = '<div class="empty-msg">임박한 마감 없음 🎉</div>';
+  } else {
+    dlEl.innerHTML = up.map(t=>{
+      const d=daysUntil(t.due);
+      const cls=d<=1?'d-red':d<=3?'d-amber':'d-gray';
+      return`<div class="dl-item">
+        <div class="dl-title">${t.title}</div>
+        <div class="dl-badge ${cls}">D-${d}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 오늘 할 일
+  const todayKey = getTodayKey();
+  const weekKey  = getWeekKey();
+  const todayWD  = now.getDay()===0?6:now.getDay()-1;
+  const todayTodos = todos.filter(t=>{
+    if(t.repeat==='daily') return true;
+    if(t.repeat==='weekly') return (t.weekday??0)===todayWD;
+    return false;
+  });
+  const todoEl = document.getElementById('w-todos');
+  if(!todayTodos.length){
+    todoEl.innerHTML = '<div class="empty-msg">오늘 할 일 없음</div>';
+  } else {
+    todoEl.innerHTML = todayTodos.map(t=>{
+      const key = t.repeat==='daily'?todayKey:weekKey;
+      const done = (t.completedDates||[]).includes(key);
+      return`<div class="todo-item ${done?'done-item':''}">
+        <div class="todo-chk ${done?'done':''}" onclick="toggleTodoWidget('${t.id}','${t.repeat}')">${done?'✓':''}</div>
+        <div class="todo-title">${t.title}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // D-day
+  const top = [...ddays].sort((a,b)=>Math.abs(daysUntil(a.date))-Math.abs(daysUntil(b.date))).slice(0,4);
+  const ddEl = document.getElementById('w-ddays');
+  if(!top.length){
+    ddEl.innerHTML = '<div class="empty-msg">D-day 없음</div>';
+  } else {
+    ddEl.innerHTML = top.map(d=>{
+      const n=daysUntil(d.date);
+      const past=n<0;
+      const c=!past&&n<=3?'var(--red)':!past&&n<=7?'var(--amber)':'var(--accent2)';
+      return`<div class="dd-item">
+        <span class="dd-name">${d.emoji||'📌'} ${d.name}</span>
+        <span class="dd-n" style="color:${c}">${past?`+${Math.abs(n)}`:`D-${n}`}</span>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('w-updated').textContent =
+    `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 업데이트`;
+
+  // 알림 체크
+  checkAlerts(tasks);
+}
+
+function toggleTodoWidget(id, repeat){
+  const todos = load('todos');
+  const t = todos.find(x=>String(x.id)===String(id));
+  if(!t)return;
+  const key = repeat==='daily'?getTodayKey():getWeekKey();
+  if((t.completedDates||[]).includes(key)){
+    t.completedDates = t.completedDates.filter(d=>d!==key);
+  } else {
+    if(!t.completedDates)t.completedDates=[];
+    t.completedDates.push(key);
+  }
+  localStorage.setItem('aru_todos', JSON.stringify(todos));
+  render();
+}
+
+let shownAlerts = new Set();
+function checkAlerts(tasks){
+  const banner = document.getElementById('notif-banner');
+  const urgent = tasks.filter(t=>!t.done&&t.due&&daysUntil(t.due)===0);
+  if(urgent.length && !shownAlerts.has('today')){
+    shownAlerts.add('today');
+    banner.textContent = `⚠️ 오늘 마감! ${urgent.map(t=>t.title).join(', ')}`;
+    banner.classList.add('on');
+    setTimeout(()=>banner.classList.remove('on'), 8000);
+  }
+}
+
+// 5분마다 자동 새로고침
+render();
+setInterval(render, 5 * 60 * 1000);
+</script>
+</body>
+</html>
