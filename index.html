@@ -323,7 +323,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;col
 .cal-dow.sun{color:var(--red);}
 .cal-dow.sat{color:var(--blue);}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--border);border-radius:0 0 var(--r) var(--r);overflow:hidden;flex:1;width:100%;}
-.cal-day{background:var(--bg2);padding:6px 7px;cursor:pointer;transition:background .15s;position:relative;min-height:70px;min-width:0;overflow:hidden;}
+.cal-day{background:var(--bg2);padding:5px 6px;cursor:pointer;transition:background .15s;position:relative;overflow:hidden;min-width:0;}
 .cal-day:hover{background:var(--bg3);}
 .cal-day.today{background:rgba(124,109,250,.08);}
 .cal-day.today .cal-dn{color:var(--accent2);font-weight:700;background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
@@ -952,12 +952,13 @@ lower_bound(v.begin(),v.end(),x);</pre></div>
 </div><!-- #main -->
 
 <!-- ===== CALENDAR ===== -->
-<div class="page" id="p-cal" style="overflow:hidden;min-width:0;">
+<div class="page" id="p-cal">
   <div class="topbar">
     <div class="tb-l"><h1>📆 달력</h1><p>과제·동아리·개인 일정 통합 관리</p></div>
     <div class="tb-r">
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <span style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#f04747;display:inline-block"></span>과제</span>
+        <span style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#7c6dfa;display:inline-block"></span>수업</span>
         <span style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#ff6b9d;display:inline-block"></span>동아리</span>
         <span style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#3ecf8e;display:inline-block"></span>개인</span>
         <span style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>D-day</span>
@@ -966,8 +967,10 @@ lower_bound(v.begin(),v.end(),x);</pre></div>
       <button class="btn pri" onclick="openAddPersonal()">+ 개인 일정</button>
     </div>
   </div>
-  <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding:14px 20px 0;min-width:0;width:100%;">
-    <div class="cal-header">
+  <!-- 달력 본체 — flex 전체 채움 -->
+  <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding:12px 16px 0;width:100%;">
+    <!-- 네비 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0;">
       <div class="cal-nav">
         <div class="cal-nav-btn" onclick="calMove(-1)">‹</div>
         <div class="cal-month" id="cal-month-lbl"></div>
@@ -978,20 +981,21 @@ lower_bound(v.begin(),v.end(),x);</pre></div>
         <button class="btn" onclick="calToday()">오늘</button>
       </div>
     </div>
-    <div class="cal-body-wrap">
-      <div class="cal-dow-row">
-        <div class="cal-dow sun">일</div>
-        <div class="cal-dow">월</div>
-        <div class="cal-dow">화</div>
-        <div class="cal-dow">수</div>
-        <div class="cal-dow">목</div>
-        <div class="cal-dow">금</div>
-        <div class="cal-dow sat">토</div>
-      </div>
-      <div class="cal-grid" id="cal-body"></div>
+    <!-- 요일 헤더 -->
+    <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--border);border-radius:var(--r) var(--r) 0 0;overflow:hidden;flex-shrink:0;width:100%;">
+      <div class="cal-dow sun">일</div>
+      <div class="cal-dow">월</div>
+      <div class="cal-dow">화</div>
+      <div class="cal-dow">수</div>
+      <div class="cal-dow">목</div>
+      <div class="cal-dow">금</div>
+      <div class="cal-dow sat">토</div>
     </div>
-    <div class="cal-panel">
-      <div class="cal-pan-hd">
+    <!-- 날짜 그리드 — flex:1로 남은 공간 전부 사용 -->
+    <div id="cal-body" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--border);border-radius:0 0 var(--r) var(--r);flex:1;overflow:hidden;width:100%;"></div>
+    <!-- 선택 날짜 패널 -->
+    <div style="flex-shrink:0;background:var(--bg2);border-top:1px solid var(--border);padding:12px 14px;overflow-y:auto;max-height:200px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
         <span id="cal-det-date" style="color:var(--text2)">날짜를 선택하세요</span>
         <button class="btn" style="font-size:10.5px;padding:3px 9px" onclick="openAddPersonal(calSelDate)">+ 일정 추가</button>
       </div>
@@ -1037,32 +1041,32 @@ lower_bound(v.begin(),v.end(),x);</pre></div>
       <button class="btn pri" onclick="openAddTodo()">+ 추가</button>
     </div>
   </div>
-  <div class="scroll">
-    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start">
-      <!-- 매일 -->
-      <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:6px">
-            <span style="background:var(--gbg);color:var(--green);padding:2px 9px;border-radius:20px;font-size:11px">매일</span>
-            <span id="daily-done-count" style="font-size:11px;color:var(--text3)"></span>
-          </div>
-          <button class="btn" style="font-size:10.5px;padding:3px 8px" onclick="resetDailyTodos()">오늘 초기화</button>
+  <div class="scroll" style="max-width:720px;">
+    <!-- 매일 -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:var(--gbg);color:var(--green);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;">🌅 매일</span>
+          <span id="daily-done-count" style="font-size:11.5px;color:var(--text3);"></span>
         </div>
-        <div id="todo-daily"></div>
-        <div class="empty" id="todo-daily-empty" style="display:none;padding:20px"><div class="empty-i" style="font-size:24px">🌅</div><h3 style="font-size:13px">매일 할 일 없음</h3></div>
+        <button class="btn" style="font-size:11px;padding:4px 10px;" onclick="resetDailyTodos()">오늘 초기화</button>
       </div>
-      <!-- 매주 -->
-      <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:6px">
-            <span style="background:var(--abg);color:var(--accent2);padding:2px 9px;border-radius:20px;font-size:11px">매주</span>
-            <span id="weekly-done-count" style="font-size:11px;color:var(--text3)"></span>
-          </div>
-          <button class="btn" style="font-size:10.5px;padding:3px 8px" onclick="resetWeeklyTodos()">이번 주 초기화</button>
+      <div id="todo-daily"></div>
+      <div class="empty" id="todo-daily-empty" style="display:none;padding:24px 0;"><div class="empty-i" style="font-size:28px;">🌅</div><h3>매일 할 일 없음</h3><p>+ 추가 버튼으로 등록해보세요</p></div>
+    </div>
+    <!-- 구분선 -->
+    <div style="height:1px;background:var(--border);margin-bottom:20px;"></div>
+    <!-- 매주 -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:var(--abg);color:var(--accent2);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;">📅 매주</span>
+          <span id="weekly-done-count" style="font-size:11.5px;color:var(--text3);"></span>
         </div>
-        <div id="todo-weekly"></div>
-        <div class="empty" id="todo-weekly-empty" style="display:none;padding:20px"><div class="empty-i" style="font-size:24px">📅</div><h3 style="font-size:13px">매주 할 일 없음</h3></div>
+        <button class="btn" style="font-size:11px;padding:4px 10px;" onclick="resetWeeklyTodos()">이번 주 초기화</button>
       </div>
+      <div id="todo-weekly"></div>
+      <div class="empty" id="todo-weekly-empty" style="display:none;padding:24px 0;"><div class="empty-i" style="font-size:28px;">📅</div><h3>매주 할 일 없음</h3><p>+ 추가 버튼으로 등록해보세요</p></div>
     </div>
   </div>
 </div>
