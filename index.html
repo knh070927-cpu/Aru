@@ -309,6 +309,42 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;col
 .slbl{font-size:13px;}
 .ssub{font-size:10.5px;color:var(--text3);margin-top:2px;}
 .ibanner{background:var(--abg);border:1px solid var(--aborder);border-radius:var(--rlg);padding:16px 18px;display:flex;gap:12px;align-items:center;margin-bottom:18px;}
+
+/* ── CALENDAR ── */
+.cal-layout{display:grid;grid-template-columns:1fr 260px;gap:14px;align-items:start;}
+.cal-nav{display:flex;align-items:center;gap:10px;}
+.cal-nav-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:14px;transition:all .15s;}
+.cal-nav-btn:hover{background:var(--bg4);color:var(--text);}
+.cal-month{font-size:16px;font-weight:600;min-width:100px;text-align:center;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border-radius:var(--r);overflow:hidden;}
+.cal-dow{background:var(--bg3);padding:6px 0;text-align:center;font-size:10.5px;font-weight:600;color:var(--text3);}
+.cal-dow.sun{color:var(--red);}
+.cal-dow.sat{color:var(--blue);}
+.cal-day{background:var(--bg2);padding:5px 6px;min-height:80px;cursor:pointer;transition:background .15s;position:relative;}
+.cal-day:hover{background:var(--bg3);}
+.cal-day.today{background:var(--abg);}
+.cal-day.today .cal-day-n{color:var(--accent2);font-weight:700;}
+.cal-day.other{background:var(--bg);opacity:.5;}
+.cal-day.selected{outline:2px solid var(--accent);outline-offset:-2px;}
+.cal-day-n{font-size:12px;font-weight:500;margin-bottom:3px;}
+.cal-day.sun .cal-day-n{color:var(--red);}
+.cal-day.sat .cal-day-n{color:var(--blue);}
+.cal-event{font-size:10px;padding:1px 5px;border-radius:3px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;}
+.cal-event:hover{opacity:.8;}
+.cal-more{font-size:9.5px;color:var(--text3);margin-top:1px;}
+.cal-side{display:flex;flex-direction:column;gap:10px;}
+.cal-day-detail{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:14px;}
+.cal-det-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.cal-det-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.cal-det-item:last-child{border:none;}
+.cal-det-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.cal-det-info{flex:1;}
+.cal-det-name{font-size:12.5px;font-weight:500;}
+.cal-det-sub{font-size:10.5px;color:var(--text3);}
+.cal-det-time{font-size:10.5px;color:var(--text3);flex-shrink:0;}
+.legend-row{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text2);margin-bottom:5px;}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
 /* UNDO BUTTON */
 #undo-btn{display:none;position:fixed;bottom:60px;right:18px;z-index:500;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rlg);padding:8px 14px;font-size:12px;color:var(--text2);cursor:pointer;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:all .2s;font-family:inherit;}
 #undo-btn:hover{background:var(--bg4);color:var(--text);border-color:var(--border3);}
@@ -343,6 +379,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;col
   </div>
   <div class="ng"><div class="ngl">일정</div>
     <div class="ni" id="n-tt" onclick="go('tt')"><span class="nicon">🗓️</span>시간표</div>
+    <div class="ni" id="n-cal" onclick="go('cal')"><span class="nicon">📆</span>달력</div>
     <div class="ni" id="n-tasks" onclick="go('tasks')"><span class="nicon">✅</span>과제/일정<span class="nbadge" id="tbadge" style="display:none"></span></div>
     <div class="ni" id="n-todo" onclick="go('todo')"><span class="nicon">🔁</span>반복 할 일</div>
     <div class="ni" id="n-clubs" onclick="go('clubs')"><span class="nicon">🎭</span>동아리/활동</div>
@@ -912,6 +949,100 @@ lower_bound(v.begin(),v.end(),x);</pre></div>
 
 </div><!-- #main -->
 
+<!-- ===== CALENDAR ===== -->
+<div class="page" id="p-cal">
+  <div class="topbar">
+    <div class="tb-l"><h1>📆 달력</h1><p>모든 일정을 한눈에 — 과제·수업·동아리·개인 일정</p></div>
+    <div class="tb-r">
+      <button class="btn" onclick="exportICS()">📥 Google 캘린더로 내보내기</button>
+      <button class="btn pri" onclick="openAddPersonal()">+ 개인 일정</button>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="cal-layout">
+      <div>
+        <!-- 달력 헤더 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="cal-nav">
+            <div class="cal-nav-btn" onclick="calMove(-1)">‹</div>
+            <div class="cal-month" id="cal-month-lbl"></div>
+            <div class="cal-nav-btn" onclick="calMove(1)">›</div>
+          </div>
+          <button class="btn" onclick="calToday()">오늘</button>
+        </div>
+        <!-- 달력 그리드 -->
+        <div class="cal-grid">
+          <div class="cal-dow sun">일</div>
+          <div class="cal-dow">월</div>
+          <div class="cal-dow">화</div>
+          <div class="cal-dow">수</div>
+          <div class="cal-dow">목</div>
+          <div class="cal-dow">금</div>
+          <div class="cal-dow sat">토</div>
+        </div>
+        <div class="cal-grid" id="cal-body" style="margin-top:1px"></div>
+      </div>
+
+      <!-- 사이드 패널 -->
+      <div class="cal-side">
+        <!-- 선택한 날 상세 -->
+        <div class="cal-day-detail">
+          <div class="cal-det-title">
+            <span id="cal-det-date">날짜를 선택하세요</span>
+            <button class="btn" style="font-size:10.5px;padding:3px 8px" onclick="openAddPersonal(calSelDate)">+ 추가</button>
+          </div>
+          <div id="cal-det-list"><div class="empty-msg">이날 일정 없음</div></div>
+        </div>
+
+        <!-- 범례 -->
+        <div class="card">
+          <div class="ctitle">범례</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#f04747"></div>과제 / 시험 / 마감</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#7c6dfa"></div>수업</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#ff6b9d"></div>동아리 / 스터디 일정</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#3ecf8e"></div>개인 일정</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#f59e0b"></div>D-day / 기념일</div>
+        </div>
+
+        <!-- 이번 달 요약 -->
+        <div class="card">
+          <div class="ctitle">이번 달 요약</div>
+          <div id="cal-month-summary"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Personal event modal -->
+<div class="ov" id="m-personal">
+  <div class="modal" style="width:440px">
+    <div class="mh" id="m-personal-title">개인 일정 추가 <span class="mx" onclick="closeM('m-personal')">✕</span></div>
+    <div class="frow"><input class="fi f1" id="pe-title" placeholder="일정 제목 (예: 친구 약속, 병원 예약)"></div>
+    <div class="frow">
+      <input type="date" class="fi f1" id="pe-date">
+      <input type="time" class="fi" id="pe-start" style="width:90px">
+      <span style="align-self:center;color:var(--text3);font-size:12px">~</span>
+      <input type="time" class="fi" id="pe-end" style="width:90px">
+    </div>
+    <div class="frow">
+      <select class="fi f1" id="pe-category">
+        <option value="personal">🙋 개인</option>
+        <option value="health">🏥 건강/병원</option>
+        <option value="social">👥 약속/모임</option>
+        <option value="travel">✈️ 여행/외출</option>
+        <option value="family">🏠 가족</option>
+        <option value="etc">📌 기타</option>
+      </select>
+    </div>
+    <div class="frow"><textarea class="fi f1" id="pe-note" placeholder="메모" style="height:56px;resize:none"></textarea></div>
+    <div style="display:flex;gap:7px;margin-top:11px">
+      <button class="btn pri" id="pe-save-btn" onclick="savePersonal()">추가</button>
+      <button class="btn" onclick="closeM('m-personal')">취소</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== TODO ===== -->
 <div class="page" id="p-todo">
   <div class="topbar">
@@ -1127,6 +1258,7 @@ let ddays=JSON.parse(localStorage.getItem('aru_ddays')||'[]');
 let notes=JSON.parse(localStorage.getItem('aru_notes')||'[]');
 let vault=JSON.parse(localStorage.getItem('aru_vault')||'[]');
 let todos=JSON.parse(localStorage.getItem('aru_todos')||'[]');
+let personal=JSON.parse(localStorage.getItem('aru_personal')||'[]');
 let chatHist=[],chatFiles=[],curMode='explain',curNoteId=null,selClubId=null,parsedArr=[],ttParsed=[],selColor='#7c6dfa',editClassId=null,editTaskId=null;
 
 // ══ UNDO SYSTEM ══
@@ -1238,7 +1370,7 @@ function go(p){
   document.querySelectorAll('.ni').forEach(x=>x.classList.remove('on'));
   document.getElementById('p-'+p).classList.add('on');
   const n=document.getElementById('n-'+p);if(n)n.classList.add('on');
-  const h={home:renderHome,tt:renderTT,tasks:renderTasks,clubs:renderClubs,dday:renderDdays,notes:renderNotes,files:renderFiles,grade:initGrade,settings:loadSettings,todo:renderTodos};
+  const h={home:renderHome,tt:renderTT,tasks:renderTasks,clubs:renderClubs,dday:renderDdays,notes:renderNotes,files:renderFiles,grade:initGrade,settings:loadSettings,todo:renderTodos,cal:renderCal};
   if(h[p])h[p]();
 }
 
@@ -2267,6 +2399,331 @@ function renderTodos(){
       </div>`;
     }).join('');
   }
+}
+
+
+// ══ CALENDAR ══
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-based
+let calSelDate = null;
+let editPersonalId = null;
+
+const CAT_COLORS = {
+  // tasks
+  hw:'#4a9eff', exam:'#f04747', report:'#f59e0b', proj:'#3ecf8e', etc:'#7c6dfa',
+  // personal
+  personal:'#3ecf8e', health:'#f04747', social:'#ff6b9d', travel:'#2dd4bf', family:'#f59e0b',
+};
+
+function getCalEvents(year, month) {
+  const evs = [];
+  const pad = (n) => String(n).padStart(2,'0');
+  const prefix = `${year}-${pad(month+1)}`;
+  const days = new Date(year, month+1, 0).getDate();
+
+  // tasks with due date
+  tasks.forEach(t => {
+    if(t.due && t.due.startsWith(prefix)) {
+      const day = +t.due.slice(8,10);
+      evs.push({ day, label: t.title, color: CAT_COLORS[t.type]||'#f04747', type:'task', data:t });
+    }
+  });
+
+  // classes — repeat weekly
+  classes.forEach(c => {
+    const dow = c.day; // 0=월
+    for(let d=1; d<=days; d++) {
+      const date = new Date(year, month, d);
+      const dateDow = date.getDay() === 0 ? 6 : date.getDay()-1;
+      if(dateDow === dow) evs.push({ day:d, label:c.name, color:c.color||'#7c6dfa', type:'class', data:c });
+    }
+  });
+
+  // club events
+  clubs.forEach(cl => {
+    cl.events.forEach(e => {
+      if(e.date && e.date.startsWith(prefix)) {
+        const day = +e.date.slice(8,10);
+        evs.push({ day, label:`${cl.emoji||'🎭'} ${e.name}`, color:'#ff6b9d', type:'club', data:e, clubName:cl.name });
+      }
+    });
+  });
+
+  // ddays
+  ddays.forEach(d => {
+    if(d.date && d.date.startsWith(prefix)) {
+      const day = +d.date.slice(8,10);
+      evs.push({ day, label:`${d.emoji||'📌'} ${d.name}`, color:'#f59e0b', type:'dday', data:d });
+    }
+  });
+
+  // personal events
+  personal.forEach(p => {
+    if(p.date && p.date.startsWith(prefix)) {
+      const day = +p.date.slice(8,10);
+      evs.push({ day, label:p.title, color:CAT_COLORS[p.category]||'#3ecf8e', type:'personal', data:p });
+    }
+  });
+
+  return evs;
+}
+
+function renderCal() {
+  const lbl = document.getElementById('cal-month-lbl');
+  lbl.textContent = `${calYear}년 ${calMonth+1}월`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+  const today = new Date();
+  const isThisMonth = today.getFullYear()===calYear && today.getMonth()===calMonth;
+
+  const evs = getCalEvents(calYear, calMonth);
+  // group by day
+  const byDay = {};
+  evs.forEach(e => { if(!byDay[e.day]) byDay[e.day]=[]; byDay[e.day].push(e); });
+
+  const body = document.getElementById('cal-body');
+  let cells = '';
+  const total = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+
+  for(let i=0; i<total; i++) {
+    const col = i % 7; // 0=Sun
+    let day, isOther=false;
+    if(i < firstDay) { day = daysInPrev - firstDay + i + 1; isOther=true; }
+    else if(i >= firstDay+daysInMonth) { day = i - firstDay - daysInMonth + 1; isOther=true; }
+    else { day = i - firstDay + 1; }
+
+    const isToday = !isOther && isThisMonth && day===today.getDate();
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isSel = calSelDate===dateStr;
+    const dayEvs = isOther ? [] : (byDay[day]||[]);
+    const maxShow = 3;
+    const more = dayEvs.length > maxShow ? dayEvs.length - maxShow : 0;
+
+    const cls = [
+      'cal-day',
+      isOther?'other':'',
+      isToday?'today':'',
+      isSel?'selected':'',
+      col===0?'sun':'',
+      col===6?'sat':'',
+    ].filter(Boolean).join(' ');
+
+    const evHtml = dayEvs.slice(0,maxShow).map(e =>
+      `<div class="cal-event" style="background:${e.color}22;color:${e.color};border-left:2px solid ${e.color}" title="${e.label}">${e.label}</div>`
+    ).join('');
+
+    cells += `<div class="${cls}" onclick="selectCalDay('${dateStr}')">
+      <div class="cal-day-n">${day}</div>
+      ${evHtml}
+      ${more?`<div class="cal-more">+${more}개 더</div>`:''}
+    </div>`;
+  }
+  body.innerHTML = cells;
+
+  // month summary
+  const allEvs = getCalEvents(calYear, calMonth);
+  const taskCnt = allEvs.filter(e=>e.type==='task').length;
+  const classCnt = new Set(allEvs.filter(e=>e.type==='class').map(e=>e.data.name)).size;
+  const clubCnt = allEvs.filter(e=>e.type==='club').length;
+  const persCnt = allEvs.filter(e=>e.type==='personal').length;
+  document.getElementById('cal-month-summary').innerHTML = [
+    ['📝 과제 / 시험', taskCnt+'개', '#f04747'],
+    ['📚 수업 종류', classCnt+'개', '#7c6dfa'],
+    ['🎭 동아리 일정', clubCnt+'개', '#ff6b9d'],
+    ['🙋 개인 일정', persCnt+'개', '#3ecf8e'],
+  ].map(([l,v,c])=>`<div class="sr"><span style="color:var(--text2)">${l}</span><span style="font-weight:600;color:${c}">${v}</span></div>`).join('');
+
+  if(calSelDate) selectCalDay(calSelDate);
+}
+
+function selectCalDay(dateStr) {
+  calSelDate = dateStr;
+  renderCal();
+
+  const d = new Date(dateStr);
+  const DN = ['일','월','화','수','목','금','토'];
+  document.getElementById('cal-det-date').textContent =
+    `${d.getMonth()+1}월 ${d.getDate()}일 (${DN[d.getDay()]})`;
+  document.getElementById('cal-det-date').dataset.date = dateStr;
+
+  // collect all events for this date
+  const evs = [];
+  const pad = n=>String(n).padStart(2,'0');
+
+  tasks.filter(t=>t.due&&t.due.startsWith(dateStr)).forEach(t=>{
+    evs.push({ label:t.title, sub:TLBL[t.type]||'과제', color:CAT_COLORS[t.type]||'#f04747', time:t.due.slice(11,16)||'', actions:[
+      `<span class="chip" onclick="editTask(${t.id});closeM('m-task')">수정</span>`,
+    ]});
+  });
+
+  const dow = d.getDay()===0?6:d.getDay()-1;
+  classes.filter(c=>c.day===dow).sort((a,b)=>a.start.localeCompare(b.start)).forEach(c=>{
+    evs.push({ label:c.name, sub:c.room||'', color:c.color||'#7c6dfa', time:`${c.start}~${c.end}`, actions:[] });
+  });
+
+  clubs.forEach(cl=>{
+    cl.events.filter(e=>e.date&&e.date.startsWith(dateStr)).forEach(e=>{
+      evs.push({ label:`${cl.emoji||'🎭'} ${e.name}`, sub:cl.name+(e.place?' · '+e.place:''), color:'#ff6b9d', time:e.date.slice(11,16)||'', actions:[] });
+    });
+  });
+
+  ddays.filter(dd=>dd.date&&dd.date.startsWith(dateStr)).forEach(dd=>{
+    const n = daysUntil(dd.date);
+    evs.push({ label:`${dd.emoji} ${dd.name}`, sub:`D-${n}`, color:'#f59e0b', time:'', actions:[] });
+  });
+
+  personal.filter(p=>p.date&&p.date.startsWith(dateStr)).forEach(p=>{
+    const endTime = p.end ? `~${p.end}` : '';
+    evs.push({ label:p.title, sub:p.note||'', color:CAT_COLORS[p.category]||'#3ecf8e', time:(p.start||'')+endTime, actions:[
+      `<span class="chip" onclick="editPersonal('${p.id}')">수정</span>`,
+      `<span class="chip del" onclick="delPersonal('${p.id}')">삭제</span>`,
+    ]});
+  });
+
+  const list = document.getElementById('cal-det-list');
+  if(!evs.length){
+    list.innerHTML='<div class="empty-msg">이날 일정 없음</div>';
+    return;
+  }
+  // sort by time
+  evs.sort((a,b)=>a.time.localeCompare(b.time));
+  list.innerHTML = evs.map(e=>`<div class="cal-det-item">
+    <div class="cal-det-dot" style="background:${e.color}"></div>
+    <div class="cal-det-info">
+      <div class="cal-det-name">${e.label}</div>
+      ${e.sub?`<div class="cal-det-sub">${e.sub}</div>`:''}
+      ${e.actions?.length?`<div style="display:flex;gap:4px;margin-top:4px">${e.actions.join('')}</div>`:''}
+    </div>
+    ${e.time?`<div class="cal-det-time">${e.time}</div>`:''}
+  </div>`).join('');
+}
+
+function calMove(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}else if(calMonth<0){calMonth=11;calYear--;}renderCal();}
+function calToday(){calYear=new Date().getFullYear();calMonth=new Date().getMonth();renderCal();}
+
+// ── Personal Events ──
+const PE_CATS = {personal:'🙋 개인',health:'🏥 건강',social:'👥 약속',travel:'✈️ 여행',family:'🏠 가족',etc:'📌 기타'};
+
+function openAddPersonal(date=''){
+  editPersonalId=null;
+  document.getElementById('m-personal-title').childNodes[0].nodeValue='개인 일정 추가 ';
+  document.getElementById('pe-save-btn').textContent='추가';
+  document.getElementById('pe-save-btn').onclick=savePersonal;
+  ['pe-title','pe-start','pe-end','pe-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pe-date').value = date||calSelDate||(new Date().toISOString().slice(0,10));
+  document.getElementById('pe-category').value='personal';
+  openM('m-personal');
+}
+
+function editPersonal(id){
+  const p=personal.find(x=>x.id==id);if(!p)return;
+  editPersonalId=id;
+  document.getElementById('m-personal-title').childNodes[0].nodeValue='개인 일정 수정 ';
+  document.getElementById('pe-save-btn').textContent='저장';
+  document.getElementById('pe-save-btn').onclick=updatePersonal;
+  document.getElementById('pe-title').value=p.title;
+  document.getElementById('pe-date').value=p.date;
+  document.getElementById('pe-start').value=p.start||'';
+  document.getElementById('pe-end').value=p.end||'';
+  document.getElementById('pe-category').value=p.category||'personal';
+  document.getElementById('pe-note').value=p.note||'';
+  openM('m-personal');
+}
+
+function savePersonal(){
+  const title=document.getElementById('pe-title').value.trim();
+  if(!title){toast('제목을 입력하세요','err');return;}
+  snapshot('개인 일정 추가: '+title);
+  personal.push({id:uid(),title,date:document.getElementById('pe-date').value,start:document.getElementById('pe-start').value,end:document.getElementById('pe-end').value,category:document.getElementById('pe-category').value,note:document.getElementById('pe-note').value});
+  localStorage.setItem('aru_personal',JSON.stringify(personal));
+  closeM('m-personal');renderCal();toast('일정 추가됨 ✅');
+}
+
+function updatePersonal(){
+  const title=document.getElementById('pe-title').value.trim();
+  if(!title){toast('제목을 입력하세요','err');return;}
+  const i=personal.findIndex(x=>x.id==editPersonalId);if(i<0)return;
+  snapshot('개인 일정 수정: '+title);
+  personal[i]={...personal[i],title,date:document.getElementById('pe-date').value,start:document.getElementById('pe-start').value,end:document.getElementById('pe-end').value,category:document.getElementById('pe-category').value,note:document.getElementById('pe-note').value};
+  localStorage.setItem('aru_personal',JSON.stringify(personal));
+  closeM('m-personal');renderCal();toast('수정됨 ✅');
+}
+
+function delPersonal(id){
+  const p=personal.find(x=>x.id==id);
+  if(!confirm(`"${p?.title}" 일정을 삭제할까요?`))return;
+  snapshot('개인 일정 삭제: '+(p?.title||''));
+  personal=personal.filter(x=>x.id!=id);
+  localStorage.setItem('aru_personal',JSON.stringify(personal));
+  renderCal();toast('삭제됨 (Ctrl+Z로 복구)');
+}
+
+// ── Google Calendar / ICS Export ──
+function exportICS(){
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//아루 캠퍼스 비서//KR','CALSCALE:GREGORIAN'];
+
+  function toICSDate(dateStr,timeStr=''){
+    if(!dateStr)return'';
+    const clean=dateStr.replace(/-/g,'');
+    if(timeStr){const t=timeStr.replace(/:/g,'');return clean+'T'+t+'00';}
+    return clean;
+  }
+
+  // Tasks
+  tasks.filter(t=>t.due&&!t.done).forEach(t=>{
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:task-'+t.id+'@aru');
+    lines.push('SUMMARY:'+(t.subject?`[${t.subject}] `:'')+(TLBL[t.type]||'')+' - '+t.title);
+    lines.push('DTSTART:'+toICSDate(t.due.slice(0,10),t.due.slice(11,16)));
+    lines.push('DTEND:'+toICSDate(t.due.slice(0,10),t.due.slice(11,16)));
+    if(t.note)lines.push('DESCRIPTION:'+t.note);
+    lines.push('END:VEVENT');
+  });
+
+  // Club events
+  clubs.forEach(cl=>{
+    cl.events.forEach(e=>{
+      if(!e.date)return;
+      lines.push('BEGIN:VEVENT');
+      lines.push('UID:club-'+e.id+'@aru');
+      lines.push('SUMMARY:'+cl.emoji+' ['+cl.name+'] '+e.name);
+      lines.push('DTSTART:'+toICSDate(e.date.slice(0,10),e.date.slice(11,16)));
+      lines.push('DTEND:'+toICSDate(e.date.slice(0,10),e.date.slice(11,16)));
+      if(e.place)lines.push('LOCATION:'+e.place);
+      lines.push('END:VEVENT');
+    });
+  });
+
+  // D-days
+  ddays.forEach(d=>{
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:dday-'+d.id+'@aru');
+    lines.push('SUMMARY:'+d.emoji+' '+d.name);
+    lines.push('DTSTART;VALUE=DATE:'+d.date.replace(/-/g,''));
+    lines.push('DTEND;VALUE=DATE:'+d.date.replace(/-/g,''));
+    lines.push('END:VEVENT');
+  });
+
+  // Personal events
+  personal.forEach(p=>{
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:pers-'+p.id+'@aru');
+    lines.push('SUMMARY:'+(PE_CATS[p.category]||'')+'  '+p.title);
+    lines.push('DTSTART:'+toICSDate(p.date,p.start));
+    lines.push('DTEND:'+toICSDate(p.date,p.end||p.start));
+    if(p.note)lines.push('DESCRIPTION:'+p.note);
+    lines.push('END:VEVENT');
+  });
+
+  lines.push('END:VCALENDAR');
+  const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='아루_캘린더.ics';
+  a.click();
+  toast('📥 .ics 파일 다운로드됨! Google 캘린더에서 가져오기 하세요');
 }
 
 // ══ INIT ══
